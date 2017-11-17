@@ -2,14 +2,6 @@ html, body, #root, .App {
   height: 100%;
 }
 
-html {
-  overflow-x: hidden;
-}
-
-body {
-  position: relative;
-}
-
 .App {
   display: flex;
   flex-direction: column;
