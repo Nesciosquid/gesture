@@ -1,0 +1,30 @@
+html, body, #root, .App { 
+  height: 100%;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-image-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-image {
+  flex-grow: 1;
+  width: 100%;
+  background-color: black;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.image-footer {
+  flex-grow: 0;
+  height: 50px;
+}
