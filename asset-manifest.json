@@ -1,7 +1,7 @@
 {
-  "gesture\\static\\media\\logo.svg": "gesture/static/media/logo.5d5d9eef.svg",
-  "main.css": "gesture/static/css/main.7639fa12.css",
-  "main.css.map": "gesture/static/css/main.7639fa12.css.map",
-  "main.js": "gesture/static/js/main.0ffd236f.js",
-  "main.js.map": "gesture/static/js/main.0ffd236f.js.map"
+  "main.css": "static/css/main.7639fa12.css",
+  "main.css.map": "static/css/main.7639fa12.css.map",
+  "main.js": "static/js/main.81db6e32.js",
+  "main.js.map": "static/js/main.81db6e32.js.map",
+  "static\\media\\logo.svg": "static/media/logo.5d5d9eef.svg"
 }
