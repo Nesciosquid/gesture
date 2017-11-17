@@ -2,12 +2,13 @@
   "name": "gesture",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Nesciosquid.github.io/gesture",
   "dependencies": {
     "gh-pages": "^1.0.0",
     "imgur": "^0.2.1",
     "react": "^16.1.1",
     "react-dom": "^16.1.1",
-    "react-scripts": "1.0.17"
+    "react-scripts": "^1.0.17"
   },
   "scripts": {
     "start": "react-scripts start",
