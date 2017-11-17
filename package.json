@@ -13,6 +13,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
+    "deploy": "yarn build & gh-pages -d build",
     "eject": "react-scripts eject"
   }
 }
