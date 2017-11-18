@@ -13,13 +13,27 @@ export const DefaultImagesState = {
 };
 
 function addAlbum(state: ImagesState, album: ImgurAlbumData): ImagesState {
-    return { ...state, albums: [...state.albums, album] };
+    if (state.albums.filter(stateAlbum => stateAlbum.id === album.id).length === 0) {
+        return { ...state, albums: [...state.albums, album] };
+    } 
+    return state;
 }
 
-export default function ImageReducer(state: ImagesState = DefaultImagesState, action: ReduxAction): ImagesState {
-    switch (action.type) {
+function setAlbumSelection(state: ImagesState, albumId: string, selected: boolean): ImagesState {
+    if (selected) {
+        const newSelections = state.selectedAlbums.concat();
+        newSelections.push(albumId);
+        return { ...state, selectedAlbums: newSelections };
+    } 
+    return { ...state, selectedAlbums: state.selectedAlbums.filter(id => id !== albumId )};
+}
+
+export default function ImageReducer(state: ImagesState = DefaultImagesState, {type, payload}: ReduxAction): ImagesState {
+    switch (type) {
         case (actionTypes.addAlbum): 
-            return addAlbum(state, action.payload);
+            return addAlbum(state, payload);
+        case (actionTypes.toggleAlbumSelection):
+            return setAlbumSelection(state, payload.albumId, payload.selected);
         default: return state;
     }
 }

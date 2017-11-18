@@ -1,12 +1,12 @@
 import { connect } from 'react-redux';
 import { ReduxState } from './reducers/index';
-import { getAllImages } from './selectors/search';
+import { getSelectedImages } from './selectors/images';
 import { fetchAlbumFromImgur } from './actions/images';
 import App from './App';
 
 function mapStateToProps(state: ReduxState) {
     return ({
-        allImages: getAllImages(state) 
+        allImages: getSelectedImages(state) 
     });
 }
 

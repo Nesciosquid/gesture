@@ -1,0 +1,9 @@
+.album-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.album-container--left {
+    height: 50px;
+    overflow: hidden;
+}

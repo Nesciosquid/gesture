@@ -26,5 +26,4 @@ html, body, #root, .App {
 
 .image-footer {
   flex-grow: 0;
-  height: 50px;
 }

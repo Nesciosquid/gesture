@@ -1,8 +1,10 @@
 import * as React from 'react';
 import './App.css';
 import { getImage, ImgurImageData } from './utils/imgur';
+import { Button, Progress } from 'reactstrap';
+import AlbumModal from './components/AlbumModal/AlbumModal';
 
-const defaultAdvanceTime = 5;
+const defaultAdvanceTime = 60;
 
 interface AppProps {
   allImages: ImgurImageData[];
@@ -19,6 +21,7 @@ interface AppState {
   previousImages: ImgurImageData[];
   error: boolean;
   timer: number;
+  modal: boolean;
 }
 
 class App extends React.Component<AppProps, AppState>  {
@@ -26,6 +29,7 @@ class App extends React.Component<AppProps, AppState>  {
     super(props);
     this.state = {
       albumId: 'BOEKC',
+      modal: true,
       currentImageIndex: undefined,
       shuffledImages: undefined,
       autoAdvance: true,
@@ -119,6 +123,11 @@ class App extends React.Component<AppProps, AppState>  {
       return <div style={{ backgroundImage: `url(${current.sizes.default})` }} className="hero-image" />;
     } else { return null; }
   }
+  toggleModal = () => {
+    this.setState({
+      modal: !this.state.modal
+    });
+  }
   render() {
     return (
       <div className="App">
@@ -126,15 +135,18 @@ class App extends React.Component<AppProps, AppState>  {
           {this.getHeroImage()}
         </div>
         <div className="image-footer">
-          <button onClick={this.advanceImage}>Advance {this.state.remainingTime} / {this.state.advanceTime} </button>
+          <Progress value={100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime)} />
+          <Button onClick={this.advanceImage}>Advance</Button>
           Album Id: <input type="text" value={this.state.albumId} onChange={(event) => this.updateAlbumId(event.target.value)} />
-          <button onClick={this.updateAlbum}>Add album </button>
+          <Button onClick={this.updateAlbum}>Add album </Button>
+          <Button onClick={this.toggleModal}>Modal </Button>
           <input
             name="autoAdvance"
             type="checkbox"
             checked={this.state.autoAdvance}
             onChange={this.toggleAutoAdvance}
           />
+          <AlbumModal isOpen={this.state.modal} toggle={this.toggleModal} />
         </div>
       </div>
     );

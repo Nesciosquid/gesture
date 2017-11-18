@@ -15,6 +15,10 @@ export function getSelectedImages(state: ReduxState) {
     return getImagesFromAlbums(getSelectedAlbums(state));
 }
 
+export function isAlbumSelected(state: ReduxState, albumId: string) {
+    return state.images.selectedAlbums.indexOf(albumId) > -1;
+}
+
 export function getAllAlbums(state: ReduxState) {
     return state.images.albums;
 }
