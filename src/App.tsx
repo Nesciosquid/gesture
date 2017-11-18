@@ -4,6 +4,7 @@ import { getImage, ImgurImageData } from './utils/imgur';
 import { Button } from 'reactstrap';
 import CircularProgressbar from 'react-circular-progressbar';
 import AlbumModal from './components/AlbumModal/AlbumModal';
+import TimeSettingsModal from './components/TimeSettingsModal/TimeSettingsModal';
 
 const defaultAdvanceTime = 60;
 
@@ -11,19 +12,20 @@ interface AppProps {
   allImages: ImgurImageData[];
   loadAlbums: () => void;
   fetchAlbum: (albumId: string) => void;
+  advanceTime: number;  
+  autoAdvance: boolean;
 }
 
 interface AppState {
   albumId: string;
   currentImageIndex?: number;
   shuffledImages?: ImgurImageData[];
-  autoAdvance: boolean;
-  advanceTime: number;
   remainingTime: number;
   previousImages: ImgurImageData[];
   error: boolean;
   timer: number;
-  modal: boolean;
+  albumsModal: boolean;
+  timeSettingsModal: boolean;
 }
 
 class App extends React.Component<AppProps, AppState>  {
@@ -31,11 +33,10 @@ class App extends React.Component<AppProps, AppState>  {
     super(props);
     this.state = {
       albumId: '',
-      modal: false,
+      albumsModal: false,
+      timeSettingsModal: false,
       currentImageIndex: undefined,
       shuffledImages: undefined,
-      autoAdvance: true,
-      advanceTime: defaultAdvanceTime,
       remainingTime: defaultAdvanceTime,
       previousImages: [],
       error: false,
@@ -43,7 +44,7 @@ class App extends React.Component<AppProps, AppState>  {
     };
   }
   timeTick = () => {
-    if (this.state.autoAdvance) {
+    if (this.props.autoAdvance) {
       const remaining = this.state.remainingTime;
       const newTime = remaining - 1;
       if (newTime > 0 ) {
@@ -80,7 +81,7 @@ class App extends React.Component<AppProps, AppState>  {
       } else {
         this.setState({
           currentImageIndex: nextIndex,
-          remainingTime: this.state.advanceTime
+          remainingTime: this.props.advanceTime
         });
       }
     }
@@ -89,7 +90,7 @@ class App extends React.Component<AppProps, AppState>  {
     this.setState({
       shuffledImages: images.sort(() => Math.random() - 0.5),
       currentImageIndex: 0,
-      remainingTime: this.state.advanceTime
+      remainingTime: this.props.advanceTime
     });
   }
   updateAlbumId = (id: string) => {
@@ -98,11 +99,6 @@ class App extends React.Component<AppProps, AppState>  {
   updateAlbum = () => {
     this.props.fetchAlbum(this.state.albumId);
     this.setState({ albumId: '' });
-  }
-  toggleAutoAdvance = () => {
-    this.setState({
-      autoAdvance: !this.state.autoAdvance
-    });
   }
   componentDidMount() {
     this.props.loadAlbums();
@@ -128,13 +124,18 @@ class App extends React.Component<AppProps, AppState>  {
 
     return <img src={current.sizes.default.href} className="hero-image" />;  
   }
-  toggleModal = () => {
+  toggleAlbumsModal = () => {
     this.setState({
-      modal: !this.state.modal
+      albumsModal: !this.state.albumsModal
+    });
+  }
+  toggleTimeSettingsModal = () => {
+    this.setState({
+      timeSettingsModal: !this.state.timeSettingsModal
     });
   }
   getProgressPercentage = () => {
-    return 100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime);
+    return 100 * ((this.props.advanceTime - this.state.remainingTime) / this.props.advanceTime);
   }
   render() {
     return (
@@ -144,16 +145,11 @@ class App extends React.Component<AppProps, AppState>  {
         </div>
         <div className="image-footer">
           <Button onClick={this.advanceImage}>Advance</Button>
-          <Button onClick={this.toggleModal}>Albums </Button>
-          <input
-            name="autoAdvance"
-            type="checkbox"
-            checked={this.state.autoAdvance}
-            onChange={this.toggleAutoAdvance}
-          />
-          <AlbumModal isOpen={this.state.modal} toggle={this.toggleModal} />
+          <Button onClick={this.toggleAlbumsModal}>Albums </Button>
+          <TimeSettingsModal isOpen={this.state.timeSettingsModal} toggle={this.toggleTimeSettingsModal} />
+          <AlbumModal isOpen={this.state.albumsModal} toggle={this.toggleAlbumsModal} />
         </div>
-        <div className="circle-progress">
+        <div onClick={this.toggleTimeSettingsModal} className="circle-progress">
             <CircularProgressbar 
               percentage={this.getProgressPercentage()} 
               textForPercentage={() => `${this.state.remainingTime}s`}  

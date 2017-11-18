@@ -1,0 +1,18 @@
+.advance-time-selector {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .advance-time-label {
+        flex-grow: 0;
+        margin-right: 20px;
+    }
+
+    .advance-time-buttons {
+        display: flex;
+        justify-content: flex-end;
+        flex-grow: 1;
+    }
+}

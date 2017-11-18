@@ -1,0 +1,18 @@
+.auto-advance-selector {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+
+    .auto-advance-selector-label {
+        flex-grow: 0;
+        margin-right: 20px;
+    }
+
+    .auto-advance-selector-button {
+        display: flex;
+        justify-content: flex-end;
+        flex-grow: 1;
+    }
+}

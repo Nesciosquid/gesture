@@ -4,10 +4,13 @@ import { getSelectedImages } from './selectors/images';
 import { fetchAlbumFromImgur } from './actions/images';
 import defaultAlbums from './utils/defaultAlbums';
 import App from './App';
+import { getAdvanceTime, getAutoAdvance } from './selectors/settings';
 
 function mapStateToProps(state: ReduxState) {
     return ({
-        allImages: getSelectedImages(state) 
+        allImages: getSelectedImages(state),
+        advanceTime: getAdvanceTime(state),
+        autoAdvance: getAutoAdvance(state)
     });
 }
 
