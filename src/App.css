@@ -1,10 +1,12 @@
 html, body, #root, .App { 
   height: 100%;
+  width: 100%;
 }
 
 .App {
   background: #242424;
   display: flex;
+  width: 100%;
   flex-direction: column;
 }
 
