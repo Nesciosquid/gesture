@@ -1,11 +1,15 @@
 import * as React from 'react';
 import './App.css';
-import { getAlbum, getImage, ImgurAlbumData, ImgurImageData } from './utils/imgur';
+import { getImage, ImgurImageData } from './utils/imgur';
 
 const defaultAdvanceTime = 5;
 
+interface AppProps {
+  allImages: ImgurImageData[];
+  fetchAlbum: (albumId: string) => void;
+}
+
 interface AppState {
-  album?: ImgurAlbumData;
   albumId: string;
   currentImageIndex?: number;
   shuffledImages?: ImgurImageData[];
@@ -17,11 +21,10 @@ interface AppState {
   timer: number;
 }
 
-class App extends React.Component<{}, AppState>  {
-  constructor(props: {}) {
+class App extends React.Component<AppProps, AppState>  {
+  constructor(props: AppProps) {
     super(props);
     this.state = {
-      album: undefined,
       albumId: 'BOEKC',
       currentImageIndex: undefined,
       shuffledImages: undefined,
@@ -51,6 +54,11 @@ class App extends React.Component<{}, AppState>  {
       previousImages
     });
   }
+  componentDidUpdate(lastProps: AppProps) {
+    if (lastProps.allImages !== this.props.allImages) {
+      this.shuffleImages(this.props.allImages);
+    }
+  }
   getCurrentImage = () => {
     if (this.state.shuffledImages && this.state.currentImageIndex !== undefined && this.state.shuffledImages.length > 0) {
       const image = getImage(this.state.shuffledImages[this.state.currentImageIndex]);
@@ -62,7 +70,7 @@ class App extends React.Component<{}, AppState>  {
       const maxIndex = this.state.shuffledImages.length - 1;
       const nextIndex = this.state.currentImageIndex + 1;
       if (nextIndex > maxIndex) {
-        this.shuffleImages();
+        this.shuffleImages(this.props.allImages);
       } else {
         this.setState({
           currentImageIndex: nextIndex,
@@ -71,32 +79,18 @@ class App extends React.Component<{}, AppState>  {
       }
     }
   }
-  shuffleImages = () => {
-    if (this.state.album) {
-      this.setState({
-        shuffledImages: this.state.album.images.sort(() => Math.random() - 0.5),
-        currentImageIndex: 0,
-        remainingTime: this.state.advanceTime
-      });
-    }
+  shuffleImages = (images: ImgurImageData[]) => {
+    this.setState({
+      shuffledImages: images.sort(() => Math.random() - 0.5),
+      currentImageIndex: 0,
+      remainingTime: this.state.advanceTime
+    });
   }
   updateAlbumId = (id: string) => {
     this.setState({ albumId: id });
   }
   updateAlbum = () => {
-    getAlbum(this.state.albumId)
-    .then(album => {
-      if (album.error) {
-        this.setState({
-          album: undefined,
-          shuffledImages: undefined,
-          error: true,
-          autoAdvance: false,
-        });
-      } else {
-        this.setState({ album, error: false }, this.shuffleImages);
-      }
-    });
+    this.props.fetchAlbum(this.state.albumId);
   }
   toggleAutoAdvance = () => {
     this.setState({
@@ -134,7 +128,7 @@ class App extends React.Component<{}, AppState>  {
         <div className="image-footer">
           <button onClick={this.advanceImage}>Advance {this.state.remainingTime} / {this.state.advanceTime} </button>
           Album Id: <input type="text" value={this.state.albumId} onChange={(event) => this.updateAlbumId(event.target.value)} />
-          <button onClick={this.updateAlbum}>Update album </button>
+          <button onClick={this.updateAlbum}>Add album </button>
           <input
             name="autoAdvance"
             type="checkbox"
