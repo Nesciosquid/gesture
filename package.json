@@ -2,7 +2,7 @@
   "name": "gesture-ts",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Nesciosquid.github.io/gesture-ts",
+  "homepage": "https://Nesciosquid.github.io/gesture",
   "dependencies": {
     "@types/react-redux": "^5.0.13",
     "@types/reactstrap": "^5.0.3",
