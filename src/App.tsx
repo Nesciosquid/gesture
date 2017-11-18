@@ -121,9 +121,11 @@ class App extends React.Component<AppProps, AppState>  {
         </div>
       );
     }
-    if (current) {
-      return <div style={{ backgroundImage: `url(${current.sizes.default})` }} className="hero-image" />;
-    } else { return null; }
+    if (!current) {
+      return null;
+    } 
+
+    return <img src={current.sizes.default.href} className="hero-image" />;  
   }
   toggleModal = () => {
     this.setState({
