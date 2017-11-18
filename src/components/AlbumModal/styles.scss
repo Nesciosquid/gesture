@@ -1,17 +1,17 @@
 .album-modal-wrapper {
     flex-grow: 0;
-    margin-bottom: 50px;
     display: flex;
     max-width: 100%;
     flex-direction: column;
 
     .album-modal {
         flex-grow: 1;
+        flex-direction: column;
         display: flex !important;
     }
 
     .album-modal-dialog {
-        flex-grow: 1;
+        flex-grow: 0;
         display: flex;
         flex-direction: column;
     }

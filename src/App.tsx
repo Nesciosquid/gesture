@@ -1,7 +1,6 @@
 import * as React from 'react';
 import './App.scss';
 import { getImage, ImgurImageData } from './utils/imgur';
-import { Button } from 'reactstrap';
 import CircularProgressbar from 'react-circular-progressbar';
 import AlbumModal from './components/AlbumModal/AlbumModal';
 import TimeSettingsModal from './components/TimeSettingsModal/TimeSettingsModal';
@@ -143,18 +142,22 @@ class App extends React.Component<AppProps, AppState>  {
         <div className="hero-image-container">
           {this.getHeroImage()}
         </div>
-        <div className="image-footer">
-          <Button onClick={this.advanceImage}>Advance</Button>
-          <Button onClick={this.toggleAlbumsModal}>Albums </Button>
-          <TimeSettingsModal isOpen={this.state.timeSettingsModal} toggle={this.toggleTimeSettingsModal} />
-          <AlbumModal isOpen={this.state.albumsModal} toggle={this.toggleAlbumsModal} />
-        </div>
-        <div onClick={this.toggleTimeSettingsModal} className="circle-progress">
+        <div className="control-buttons">
+          <div className="skip-button" onClick={this.advanceImage}>
+            <i className="material-icons">skip_next</i>
+          </div>
+          <div className="albums-icon" onClick={this.toggleAlbumsModal}>
+            <i className="material-icons">collections</i>          
+          </div>
+          <div onClick={this.toggleTimeSettingsModal} className="circle-progress">
             <CircularProgressbar 
               percentage={this.getProgressPercentage()} 
               textForPercentage={() => `${this.state.remainingTime}s`}  
             />
           </div>
+          <TimeSettingsModal isOpen={this.state.timeSettingsModal} toggle={this.toggleTimeSettingsModal} />
+          <AlbumModal isOpen={this.state.albumsModal} toggle={this.toggleAlbumsModal} />
+        </div>
       </div>
     );
   }
