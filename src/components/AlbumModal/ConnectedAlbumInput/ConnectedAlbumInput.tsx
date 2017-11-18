@@ -4,7 +4,7 @@ import AlbumInput from './AlbumInput/AlbumInput';
 
 function mapDispatchToProps(dispatch: Function) {
     return ({
-        onSubmit: (albumId: string) => { fetchAlbumFromImgur(albumId); }
+        onSubmit: (albumId: string) => { dispatch(fetchAlbumFromImgur(albumId)); }
     });
 }
 

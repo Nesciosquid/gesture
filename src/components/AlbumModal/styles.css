@@ -1,0 +1,22 @@
+
+.album-modal {
+    max-height: 100%;
+    display: flex !important;
+}
+
+.album-modal-dialog {
+    flex-grow: 1;
+    display: flex;
+}
+
+.album-modal-content {
+    flex-grow: 1;
+}
+
+.album-modal-content > .modal-header {
+    flex-grow: 0;
+}
+
+.album-modalcontent > .modal-body {
+    flex-grow: 1;
+}

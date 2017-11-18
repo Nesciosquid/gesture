@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { InputGroup, InputGroupButton, Input, Button } from 'reactstrap';
+import './styles.css';
 
 interface AlbumInputProps {
     onSubmit: (albumId: string) => void;
@@ -32,9 +33,13 @@ export default class AlbumInput extends React.Component<AlbumInputProps, AlbumIn
 
     render() {
         return (
-            <div> 
+            <div className="album-input-container"> 
                 <InputGroup>
-                    <InputGroupButton><Button onClick={this.fetchAlbum}>Add Imgur Album</Button></InputGroupButton>
+                    <InputGroupButton>
+                        <Button onClick={this.fetchAlbum}>
+                            Add Imgur Album
+                        </Button>
+                    </InputGroupButton>
                     <Input 
                         placeholder="ABCDE" 
                         value={this.state.albumId} 
@@ -42,7 +47,7 @@ export default class AlbumInput extends React.Component<AlbumInputProps, AlbumIn
                     />
                 </InputGroup>
             </div>
-        )
+        );
     }
 
 }

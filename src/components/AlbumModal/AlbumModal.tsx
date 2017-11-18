@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { Modal, ModalBody, ModalFooter, ModalHeader, Button } from 'reactstrap';
+import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import ConnectedAlbumList from '../../components/ConnectedAlbumList/ConnectedAlbumList';
+import ConnectedAlbumInput from './ConnectedAlbumInput/ConnectedAlbumInput';
 import './styles.css';
 
 interface AlbumModalProps {
@@ -10,14 +11,12 @@ interface AlbumModalProps {
 
 export default function AlbumModal({ isOpen, toggle }: AlbumModalProps) {
     return (
-        <Modal isOpen={isOpen} toggle={toggle}>
+        <Modal className="album-modal-dialog" modalClassName="album-modal" contentClassName="album-modal-content" isOpen={isOpen} toggle={toggle}>
             <ModalHeader toggle={toggle}>Loaded Albums</ModalHeader>
             <ModalBody>
+                <ConnectedAlbumInput />
                 <ConnectedAlbumList />
             </ModalBody>
-            <ModalFooter>
-            <Button color="secondary" onClick={toggle}>Cancel</Button>
-            </ModalFooter>
         </Modal>
     );
 }
