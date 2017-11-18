@@ -1,5 +1,5 @@
 import * as React from 'react';
-import './App.css';
+import './App.scss';
 import { getImage, ImgurImageData } from './utils/imgur';
 import { Button, Progress } from 'reactstrap';
 import AlbumModal from './components/AlbumModal/AlbumModal';
@@ -23,6 +23,20 @@ interface AppState {
   error: boolean;
   timer: number;
   modal: boolean;
+}
+
+function toggleFullScreen() {
+  var doc = window.document as any; //tslint:disable-line
+  var docEl = doc.documentElement;
+
+  var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+  var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+    requestFullScreen.call(docEl);
+  } else {
+    cancelFullScreen.call(doc);
+  }
 }
 
 class App extends React.Component<AppProps, AppState>  {
@@ -142,6 +156,7 @@ class App extends React.Component<AppProps, AppState>  {
           <Progress value={100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime)} />
           <Button onClick={this.advanceImage}>Advance</Button>
           <Button onClick={this.toggleModal}>Albums </Button>
+          <Button onClick={toggleFullScreen}>Fullscreen</Button>
           <input
             name="autoAdvance"
             type="checkbox"
