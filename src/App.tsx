@@ -1,7 +1,8 @@
 import * as React from 'react';
 import './App.scss';
 import { getImage, ImgurImageData } from './utils/imgur';
-import { Button, Progress } from 'reactstrap';
+import { Button } from 'reactstrap';
+import CircularProgressbar from 'react-circular-progressbar';
 import AlbumModal from './components/AlbumModal/AlbumModal';
 
 const defaultAdvanceTime = 60;
@@ -23,20 +24,6 @@ interface AppState {
   error: boolean;
   timer: number;
   modal: boolean;
-}
-
-function toggleFullScreen() {
-  var doc = window.document as any; //tslint:disable-line
-  var docEl = doc.documentElement;
-
-  var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-  var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-
-  if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-    requestFullScreen.call(docEl);
-  } else {
-    cancelFullScreen.call(doc);
-  }
 }
 
 class App extends React.Component<AppProps, AppState>  {
@@ -146,6 +133,9 @@ class App extends React.Component<AppProps, AppState>  {
       modal: !this.state.modal
     });
   }
+  getProgressPercentage = () => {
+    return 100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime);
+  }
   render() {
     return (
       <div className="App">
@@ -153,10 +143,8 @@ class App extends React.Component<AppProps, AppState>  {
           {this.getHeroImage()}
         </div>
         <div className="image-footer">
-          <Progress value={100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime)} />
           <Button onClick={this.advanceImage}>Advance</Button>
           <Button onClick={this.toggleModal}>Albums </Button>
-          <Button onClick={toggleFullScreen}>Fullscreen</Button>
           <input
             name="autoAdvance"
             type="checkbox"
@@ -165,6 +153,12 @@ class App extends React.Component<AppProps, AppState>  {
           />
           <AlbumModal isOpen={this.state.modal} toggle={this.toggleModal} />
         </div>
+        <div className="circle-progress">
+            <CircularProgressbar 
+              percentage={this.getProgressPercentage()} 
+              textForPercentage={() => `${this.state.remainingTime}s`}  
+            />
+          </div>
       </div>
     );
   }
