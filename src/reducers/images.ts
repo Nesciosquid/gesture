@@ -14,7 +14,9 @@ export const DefaultImagesState = {
 
 function addAlbum(state: ImagesState, album: ImgurAlbumData): ImagesState {
     if (state.albums.filter(stateAlbum => stateAlbum.id === album.id).length === 0) {
-        return { ...state, albums: [...state.albums, album] };
+        const albums = [...state.albums, album];
+        const selectedAlbums = [...state.selectedAlbums, album.id];
+        return { ...state, albums, selectedAlbums };
     } 
     return state;
 }

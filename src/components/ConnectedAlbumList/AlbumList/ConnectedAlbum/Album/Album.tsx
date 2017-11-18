@@ -18,7 +18,8 @@ export default function Album({ album, onClick, selected }: AlbumProps) {
                     <img src={firstImage.sizes.smallSquare.href} />
                 </div>
                 <div className="album-container--right" >
-                    {album.title}
+                    <h4>{album.title}</h4>
+                    <span>{album.images.length} images</span>
                 </div>
             </div>
         </ListGroupItem>

@@ -8,6 +8,7 @@ const defaultAdvanceTime = 60;
 
 interface AppProps {
   allImages: ImgurImageData[];
+  loadAlbums: () => void;
   fetchAlbum: (albumId: string) => void;
 }
 
@@ -28,8 +29,8 @@ class App extends React.Component<AppProps, AppState>  {
   constructor(props: AppProps) {
     super(props);
     this.state = {
-      albumId: 'BOEKC',
-      modal: true,
+      albumId: '',
+      modal: false,
       currentImageIndex: undefined,
       shuffledImages: undefined,
       autoAdvance: true,
@@ -95,6 +96,7 @@ class App extends React.Component<AppProps, AppState>  {
   }
   updateAlbum = () => {
     this.props.fetchAlbum(this.state.albumId);
+    this.setState({ albumId: '' });
   }
   toggleAutoAdvance = () => {
     this.setState({
@@ -102,7 +104,7 @@ class App extends React.Component<AppProps, AppState>  {
     });
   }
   componentDidMount() {
-    this.updateAlbum();
+    this.props.loadAlbums();
   }
   componentWillUnmount() {
     clearInterval(this.state.timer);
@@ -139,7 +141,7 @@ class App extends React.Component<AppProps, AppState>  {
           <Button onClick={this.advanceImage}>Advance</Button>
           Album Id: <input type="text" value={this.state.albumId} onChange={(event) => this.updateAlbumId(event.target.value)} />
           <Button onClick={this.updateAlbum}>Add album </Button>
-          <Button onClick={this.toggleModal}>Modal </Button>
+          <Button onClick={this.toggleModal}>Albums </Button>
           <input
             name="autoAdvance"
             type="checkbox"

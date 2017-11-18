@@ -1,9 +1,10 @@
 .album-container {
     display: flex;
     flex-direction: row;
+    align-items: center;
 }
 
 .album-container--left {
-    height: 50px;
+    margin-right: 20px;
     overflow: hidden;
 }
