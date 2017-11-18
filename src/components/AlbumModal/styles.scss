@@ -1,0 +1,50 @@
+.modal-open > div:not(#root) {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+.album-modal-wrapper {
+    flex-grow: 0;
+    margin-bottom: 50px;
+    display: flex;
+    max-width: 100%;
+    flex-direction: column;
+
+    .album-modal {
+        flex-grow: 1;
+        display: flex !important;
+    }
+
+    .album-modal-dialog {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .album-modal-content {
+        flex-grow: 0;
+        display: flex;
+        flex-direction: column;
+        
+        .modal-header {
+            padding-top: 30px;
+            padding-bottom: 30px;
+
+        }
+        .modal-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+
+            .album-input-container {
+                flex-grow: 0;
+            }
+
+            .list-group {
+                flex-grow: 1;
+                overflow: auto;
+            }
+        }
+    }
+}

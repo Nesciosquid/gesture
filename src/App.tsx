@@ -141,8 +141,6 @@ class App extends React.Component<AppProps, AppState>  {
         <div className="image-footer">
           <Progress value={100 * ((this.state.advanceTime - this.state.remainingTime) / this.state.advanceTime)} />
           <Button onClick={this.advanceImage}>Advance</Button>
-          Album Id: <input type="text" value={this.state.albumId} onChange={(event) => this.updateAlbumId(event.target.value)} />
-          <Button onClick={this.updateAlbum}>Add album </Button>
           <Button onClick={this.toggleModal}>Albums </Button>
           <input
             name="autoAdvance"
