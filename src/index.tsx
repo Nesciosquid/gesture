@@ -7,15 +7,13 @@ import logger from 'redux-logger';
 import reducer from './reducers/';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-import { routerMiddleware, ConnectedRouter } from 'react-router-redux';
+import { routerMiddleware } from 'react-router-redux';
 import 'bootstrap/dist/css/bootstrap.css';
 import createHistory from 'history/createBrowserHistory';
 import { fetchAlbumFromImgur } from './actions/images';
 import albums from './utils/defaultAlbums';
 
 const history = createHistory();
-
-import { Route } from 'react-router';
 
 let middleware = [promiseMiddleware, routerMiddleware(history)];
 if (process.env.NODE_ENV === 'development') {
@@ -27,9 +25,7 @@ albums.forEach(album => store.dispatch(fetchAlbumFromImgur(album) as any));
 
 ReactDOM.render(
   <Provider store={store}>
-  <ConnectedRouter history={history}>
-    <Route exact={true} path="/" component={ConnectedApp} />
-  </ConnectedRouter>
+    <ConnectedApp />
   </Provider>,
   document.getElementById('root') as HTMLElement
 );
