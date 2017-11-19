@@ -9,9 +9,9 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import { routerMiddleware, ConnectedRouter } from 'react-router-redux';
 import 'bootstrap/dist/css/bootstrap.css';
-import * as queryString from 'query-string';
 import createHistory from 'history/createBrowserHistory';
 import { fetchAlbumFromImgur } from './actions/images';
+import albums from './utils/defaultAlbums';
 
 const history = createHistory();
 
@@ -23,18 +23,12 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 const store = createStore(reducer, applyMiddleware(...middleware));
-
-const queryParams = queryString.parse(location.search, { arrayFormat: 'index' });
-if (queryParams.albumIds) {
-  queryParams.albumIds.forEach((albumId: string) => fetchAlbumFromImgur(albumId).then(setAction => store.dispatch(setAction)));
-}
+albums.forEach(album => store.dispatch(fetchAlbumFromImgur(album) as any));
 
 ReactDOM.render(
   <Provider store={store}>
   <ConnectedRouter history={history}>
-    <div>
-      <Route exact={true} path="/" component={ConnectedApp} />
-    </div>
+    <Route exact={true} path="/" component={ConnectedApp} />
   </ConnectedRouter>
   </Provider>,
   document.getElementById('root') as HTMLElement

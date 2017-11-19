@@ -60,7 +60,7 @@ class App extends React.Component<AppProps, AppState>  {
     });
   }
   componentDidUpdate(lastProps: AppProps) {
-    if (lastProps.allImages !== this.props.allImages) {
+    if (lastProps.allImages.length !== this.props.allImages.length) {
       this.shuffleImages(this.props.allImages);
     }
   }
