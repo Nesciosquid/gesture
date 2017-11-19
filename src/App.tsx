@@ -9,7 +9,6 @@ const defaultAdvanceTime = 60;
 
 interface AppProps {
   allImages: ImgurImageData[];
-  loadAlbums: () => void;
   fetchAlbum: (albumId: string) => void;
   advanceTime: number;  
   autoAdvance: boolean;
@@ -98,9 +97,6 @@ class App extends React.Component<AppProps, AppState>  {
   updateAlbum = () => {
     this.props.fetchAlbum(this.state.albumId);
     this.setState({ albumId: '' });
-  }
-  componentDidMount() {
-    this.props.loadAlbums();
   }
   componentWillUnmount() {
     clearInterval(this.state.timer);
