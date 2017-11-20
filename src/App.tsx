@@ -12,6 +12,7 @@ interface AppProps {
   fetchAlbum: (albumId: string) => void;
   advanceTime: number;  
   autoAdvance: boolean;
+  setAutoAdvance: (advance: boolean) => void;
 }
 
 interface AppState {
@@ -141,6 +142,12 @@ class App extends React.Component<AppProps, AppState>  {
         <div className="control-buttons">
           <div className="skip-button" onClick={this.advanceImage}>
             <i className="material-icons">skip_next</i>
+          </div>
+          <div 
+            className="play-pause-button" 
+            onClick={() => this.props.setAutoAdvance(!this.props.autoAdvance)}
+          >
+            <i className="material-icons">{this.props.autoAdvance ? 'pause' : 'play_arrow'}</i>
           </div>
           <div className="albums-icon" onClick={this.toggleAlbumsModal}>
             <i className="material-icons">collections</i>          
