@@ -6,6 +6,7 @@
   "dependencies": {
     "@types/history": "^4.6.2",
     "@types/query-string": "^5.0.1",
+    "@types/react-color": "^2.13.4",
     "@types/react-redux": "^5.0.13",
     "@types/react-router": "^4.0.17",
     "@types/react-router-redux": "^5.0.10",
@@ -33,6 +34,7 @@
     "query-string": "^5.0.1",
     "react": "^16.1.1",
     "react-circular-progressbar": "^0.5.0",
+    "react-color": "^2.13.8",
     "react-dev-utils": "^4.0.1",
     "react-dom": "^16.1.1",
     "react-redux": "^5.0.6",
@@ -41,6 +43,7 @@
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.5.3",
+    "redux-thunk": "^2.2.0",
     "sass-loader": "^6.0.6",
     "source-map-loader": "^0.2.1",
     "style-loader": "0.18.2",
