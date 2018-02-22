@@ -1,6 +1,6 @@
 import { ReduxState } from '../reducers/index';
 import * as Pressure from 'pressure';
-import { DrawParams } from '../reducers/canvas';
+import { DrawParams, ToolType } from '../reducers/canvas';
 import { RGBColor } from 'react-color';
 
 export const actionTypes = {
@@ -10,7 +10,9 @@ export const actionTypes = {
   stopDrawing: 'CANVAS//STOP_DRAWING',
   draw: 'CANVAS//DRAW',
   setDrawColor: 'CANVAS//SET_DRAW_COLOR',
-  setSourceImage: 'CANVAS//SET_SOURCE_IMAGE'
+  setSourceImage: 'CANVAS//SET_SOURCE_IMAGE',
+  setPatternImage: 'CANVAS//SET_PATTERN_IMAGE',
+  setToolType: 'CANVAS//SET_TOOL_TYPE'
 };
 
 export interface RectParams {
@@ -65,6 +67,20 @@ export function setDrawColor(color: RGBColor) {
   return ({
     type: actionTypes.setDrawColor,
     payload: color
+  });
+}
+
+export function setPatternImage(image: HTMLImageElement) {
+  return ({
+    type: actionTypes.setPatternImage,
+    payload: image
+  });
+}
+
+export function setToolType(tool: ToolType) {
+  return ({
+    type: actionTypes.setToolType,
+    payload: tool
   });
 }
 

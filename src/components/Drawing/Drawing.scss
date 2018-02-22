@@ -1,0 +1,23 @@
+.pressure {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+}
+
+.drawing-app {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.canvas-container {
+  flex-grow: 1;
+}
+
+.tools-container {
+  flex-grow: 0;
+  width: 160px;
+  background: black;
+  color: white;
+}

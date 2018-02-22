@@ -2,49 +2,43 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import './index.css';
 import * as promiseMiddleware from 'redux-promise';
-import logger from 'redux-logger';
+// import logger from 'redux-logger';
 import reducer from './reducers/';
 import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
-import { routerMiddleware, ConnectedRouter } from 'react-router-redux';
+import { routerMiddleware } from 'react-router-redux';
+import { BrowserRouter } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.css';
 import createHistory from 'history/createBrowserHistory';
 import { fetchAlbumFromImgur } from './actions/images';
 import albums from './utils/defaultAlbums';
 import App from './ConnectedApp';
-import CanvasExample from './CanvasExample';
+import CanvasExample from './components/Drawing/CanvasApp';
 import * as Pressure from 'pressure';
 import { setChange } from './actions/pressure';
-import { setSourceImage, setDrawColor, setContext } from './actions/canvas';
+import { setSourceImage, setDrawColor, setContext, setPatternImage } from './actions/canvas';
 import * as ReduxThunk from 'redux-thunk';
 const pencilSource = require('./utils/pencilSource.png');
+const patternSource = require('./utils/pencilPattern.png');
 import { Switch, Route } from 'react-router-dom';
+import * as _ from 'lodash';
 
 const history = createHistory();
 
 let middleware = [promiseMiddleware, routerMiddleware(history), ReduxThunk.default];
 if (process.env.NODE_ENV === 'development') {
-  middleware.push(logger);
+  // middleware.push(logger);
 }
 const store = createStore(reducer, applyMiddleware(...middleware));
-albums.forEach(album => store.dispatch(fetchAlbumFromImgur(album) as any)); //tslint:disable-line
-Pressure.set('.pressure', {
-  change: (force: number, event: PointerEvent) => { //tslint:disable-line
-    store.dispatch(setChange(force, event));
-  },
-  end: () => {
-    store.dispatch(setChange(0, null));
-  }
-});
 
 ReactDOM.render(
   <Provider store={store}>
-    <ConnectedRouter history={history}>
+    <BrowserRouter>
       <Switch>
-        <Route exact={true} path="/" component={App} />
-        <Route path="/draw" component={CanvasExample} />
+        <Route exact={true} path={process.env.PUBLIC_URL + '/'} component={App} />
+        <Route path={process.env.PUBLIC_URL + '/draw'} component={CanvasExample} />
       </Switch>
-    </ConnectedRouter>
+    </BrowserRouter>
   </Provider>,
   document.getElementById('root') as HTMLElement
 );
@@ -64,11 +58,22 @@ sourceImage.onload = () => {
   store.dispatch(setSourceImage(sourceImage));
 };
 sourceImage.src = pencilSource;
+let patternImage = new Image();
+patternImage.onload = () => {
+  store.dispatch(setPatternImage(patternImage));
+};
+patternImage.src = patternSource;
 store.dispatch(setDrawColor({
-  r: 1,
-  g: .2,
-  b: .5,
-  a: .0
+  r: 20,
+  g: 20,
+  b: 20,
+  a: 1,
 }));
 
+const throttledSetChange = _.throttle((force, event) => store.dispatch(setChange(force, event)), 5);
 
+albums.forEach(album => store.dispatch(fetchAlbumFromImgur(album) as any)); //tslint:disable-line
+Pressure.set('.pressure', {
+  change: throttledSetChange,
+  end: () => store.dispatch(setChange(0, null))
+});
