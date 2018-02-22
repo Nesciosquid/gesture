@@ -17,7 +17,7 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
         className="pressure"
         onTouchStart={(event: TouchEvent<HTMLDivElement>) => {
           const touch = event.touches[0];
-          const x = touch.clientX - 160;
+          const x = touch.clientX - 220;
           const y = touch.clientY;
           this.props.startDrawing(x, y);
         }}
@@ -26,12 +26,12 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
         }}
         onTouchMove={(event: TouchEvent<HTMLDivElement>) => {
           const touch = event.touches[0];
-          const x = touch.clientX - 160;
+          const x = touch.clientX - 220;
           const y = touch.clientY;
-          this.props.draw(x, y, 5, 30, .1, 1);
+          this.props.draw(x, y, 1, 20, .1, 1);
         }}
         onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
-          const x = event.clientX - 160;
+          const x = event.clientX - 220;
           const y = event.clientY;
           this.props.startDrawing(x, y);
         }}
@@ -39,7 +39,7 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           this.props.stopDrawing();
         }}      
         onMouseMove={(event: MouseEvent<HTMLDivElement>) => {
-          const x = event.clientX - 160;
+          const x = event.clientX - 220;
           const y = event.clientY;
           this.props.draw(x, y, 5, 30, .1, 1);        
         }}

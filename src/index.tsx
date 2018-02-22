@@ -67,7 +67,7 @@ store.dispatch(setDrawColor({
   r: 20,
   g: 20,
   b: 20,
-  a: 1,
+  a: .1,
 }));
 
 const throttledSetChange = _.throttle((force, event) => store.dispatch(setChange(force, event)), 5);

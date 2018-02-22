@@ -161,12 +161,11 @@ function drawFromImage(state: CanvasState, params: DrawParams) {
   const size = params.size;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
-  context.strokeStyle = getSourceImagePattern(state);
-  context.stroke();
+  context.fillStyle = getSourceImagePattern(state);
+  context.fill();
   for (let i = 0; i < distance; i += 10) {
     const x = lastPosition.x + (Math.sin(angle) * i) - size / 2;
     const y = lastPosition.y + (Math.cos(angle) * i) - size / 2;
-    context.moveTo(x, y);    
     context.beginPath();
     context.ellipse(x, y, size / 2, size / 2, 0, 0, Math.PI * 2);
     context.closePath();    
@@ -220,12 +219,25 @@ function drawLines(state: CanvasState, params: DrawParams) {
   const position = params.position;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
-  context.lineJoin = context.lineCap = 'round';
-  context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a ? color.a : 1})`;
-  context.stroke();  
+  context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
+  const distance = distanceBetween(state.lastPosition, params.position);
+  const angle = angleBetween(state.lastPosition, params.position);
+  let lastX = lastPosition.x;
+  let lastY = lastPosition.y;
+  for (let z = 0 ; z < distance; z += 1 ) {
+    const x = lastPosition.x + (Math.sin(angle) * z);
+    const y = lastPosition.y + (Math.cos(angle) * z);
+    context.beginPath();
+    context.moveTo(lastX, lastY);
+    context.lineTo(x, y);
+    context.stroke();
+    lastX = x;
+    lastY = y;
+  }
   context.beginPath();
-  context.moveTo(lastPosition.x, lastPosition.y);
-  context.lineTo(position.x, position.y);
+  context.moveTo(lastX, lastY);
+  context.lineTo(params.position.x, params.position.y);
+  context.stroke();
   return { ...state, lastPosition: position };
 }
 
@@ -241,11 +253,11 @@ function drawCurves(state: CanvasState, params: DrawParams) {
   context.lineJoin = context.lineCap = 'round';  
   context.lineJoin = context.lineCap = 'round';
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a ? color.a : 1})`;
-  context.stroke();  
   context.beginPath();
   const midpoint = midPointBetween(lastPosition, position);
   context.moveTo(lastPosition.x, lastPosition.y);
   context.quadraticCurveTo(midpoint.x, midpoint.y, position.x, position.y);
+  context.stroke();    
   return { ...state, lastPosition: position };
 }
 
@@ -255,15 +267,29 @@ function drawFromPattern(state: CanvasState, params: DrawParams) {
   }
   const lastPosition = state.lastPosition;
   const context: CanvasRenderingContext2D = state.context;
-  // const color = state.drawColor;
   const position = params.position;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
   context.strokeStyle = getSourceImagePattern(state);
-  context.stroke();  
-  context.beginPath();
   context.moveTo(lastPosition.x, lastPosition.y);
-  context.lineTo(position.x, position.y);
+  const distance = distanceBetween(state.lastPosition, params.position);
+  const angle = angleBetween(state.lastPosition, params.position);
+  let lastX = lastPosition.x;
+  let lastY = lastPosition.y;
+  for (let z = 0 ; z < distance; z += params.size / 2 ) {
+    const x = lastPosition.x + (Math.sin(angle) * z);
+    const y = lastPosition.y + (Math.cos(angle) * z);
+    context.beginPath();
+    context.moveTo(lastX, lastY);
+    context.lineTo(x, y);
+    context.stroke();
+    lastX = x;
+    lastY = y;
+  }
+  context.beginPath();
+  context.moveTo(lastX, lastY);
+  context.lineTo(params.position.x, params.position.y);
+  context.stroke();
   return { ...state, lastPosition: position };
 }
 
