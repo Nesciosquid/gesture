@@ -1,44 +1,51 @@
 import * as React from 'react';
-import { SliderPicker, RGBColor } from 'react-color';
-import { setDrawColor, setToolType } from '../../actions/canvas';
+import { SketchPicker, RGBColor } from 'react-color';
+import { clear } from '../../actions/canvas';
+import { setColor } from '../../actions/tools';
 import { connect } from 'react-redux';
 import { ReduxState } from '../../reducers/index';
-import { ToolType } from '../../reducers/canvas';
+import { ToolOptions } from '../../types/tools';
 import { Button } from 'reactstrap';
+import ToolButton from './ToolButton';
+import { getToolOptions, getColor } from '../../selectors/tools';
 
 interface ToolsPanelProps {
-  force: number;
   color: RGBColor;
-  setColor: Function;
-  setToolType: Function;
+  setColor: (color: RGBColor) => void;
+  clear: () => void;
+  toolOptions: ToolOptions;
 }
 
 function ToolsPanel(props: ToolsPanelProps) {
   return (
     <div className="tools-panel">
-      <SliderPicker
+      <SketchPicker
         color={props.color}
         onChangeComplete={(color) => props.setColor(color.rgb)}
       />
-      <Button onClick={() => props.setToolType(ToolType.GRADIENTS)}>Gradients</Button>
-      <Button onClick={() => props.setToolType(ToolType.CURVES)}>Curves</Button>
-      <Button onClick={() => props.setToolType(ToolType.LINES)}>Lines</Button>
-      <Button onClick={() => props.setToolType(ToolType.PATTERN)}>Pencil</Button>
+      {
+        Object.keys(props.toolOptions).map((toolId: string) => {
+          const tool = props.toolOptions[toolId];
+          return <ToolButton tool={tool} key={tool.id} />;
+        })
+      }
+      <div style={{height: '50px' }} />
+      <Button onClick={() => props.clear()}>Clear</Button>
     </div>
   );
 }
 
 function mapStateToProps(state: ReduxState) {
   return ({
-    color: state.canvas.drawColor,
-    force: state.pressure.change.force
+    color: getColor(state),
+    toolOptions: getToolOptions(state)
   });
 }
 
 function mapDispatchToProps(dispatch: Function) {
   return ({
-    setColor: (color: RGBColor) => dispatch(setDrawColor(color)),
-    setToolType: (tool: ToolType) => dispatch(setToolType(tool))
+    setColor: (color: RGBColor) => dispatch(setColor(color)),
+    clear: () => dispatch(clear())
   });
 }
 

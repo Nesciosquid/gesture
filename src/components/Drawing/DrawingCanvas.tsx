@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { TouchEvent, MouseEvent } from 'react';
-import { startDrawing, stopDrawing, drawFromPressure } from '../../actions/canvas';
-import * as _ from 'lodash';
+import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/canvas';
+import { DrawPosition } from '../../types/canvas/index';
 
 interface DrawingCanvasProps {
-  startDrawing: Function;
-  stopDrawing: Function;
-  draw: Function;
+  startDrawing: (position: DrawPosition) => void;
+  stopDrawing: () => void;
+  draw: (position: DrawPosition) => void;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
@@ -19,7 +19,7 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           const touch = event.touches[0];
           const x = touch.clientX - 220;
           const y = touch.clientY;
-          this.props.startDrawing(x, y);
+          this.props.startDrawing({x, y});
         }}
         onTouchEnd={(event: TouchEvent<HTMLDivElement>) => {
           this.props.stopDrawing();
@@ -28,12 +28,12 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           const touch = event.touches[0];
           const x = touch.clientX - 220;
           const y = touch.clientY;
-          this.props.draw(x, y, 1, 20, .1, 1);
+          this.props.draw({x, y});
         }}
         onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
           const x = event.clientX - 220;
           const y = event.clientY;
-          this.props.startDrawing(x, y);
+          this.props.startDrawing({x, y});
         }}
         onMouseUp={(event: MouseEvent<HTMLDivElement>) => {
           this.props.stopDrawing();
@@ -41,7 +41,7 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
         onMouseMove={(event: MouseEvent<HTMLDivElement>) => {
           const x = event.clientX - 220;
           const y = event.clientY;
-          this.props.draw(x, y, 5, 30, .1, 1);        
+          this.props.draw({x, y});        
         }}
       >
         <canvas id="canvas" style={{ flexGrow: 1}}/>
@@ -51,14 +51,14 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
 }
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  draw: _.throttle((x: number, y: number, minSize: number, maxSize: number, minOpacity: number, maxOpacity: number) => {
-    dispatch(drawFromPressure(x, y, minSize, maxSize, minOpacity, maxOpacity));
-  }, 1),
+  draw: (position: DrawPosition) => {
+    dispatch(drawWithCurrentTool(position));
+  },
   stopDrawing: () => { 
     dispatch(stopDrawing());
   },
-  startDrawing: (x: number, y: number) => {
-    dispatch(startDrawing(x, y));
+  startDrawing: (position: DrawPosition) => {
+    dispatch(startDrawing(position));
   },
 });
 

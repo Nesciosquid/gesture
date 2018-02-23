@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import images, { ImagesState } from './images';
 import settings, { SettingsState } from './settings';
-import pressure, { PressureState } from './pressure';
+import tools, { ToolsState } from './tools';
 import { routerReducer, RouterState } from 'react-router-redux';
 import canvas, { CanvasState } from './canvas';
 
@@ -9,14 +9,14 @@ export interface ReduxState {
     images: ImagesState;
     settings: SettingsState;
     router: RouterState;
-    pressure: PressureState;
+    tools: ToolsState;
     canvas: CanvasState;
 }
 
 export default combineReducers<ReduxState>({
     images,
     settings,
-    pressure,   
+    tools,   
     canvas,
     router: routerReducer,
 });
