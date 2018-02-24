@@ -2,11 +2,23 @@ import { RGBColor } from 'react-color';
 import { DrawPosition, DrawParams } from '../types/canvas';
 import Tool from '../types/tools/Tool';
 import lerp from 'lerp';
+import * as FileSaver from 'file-saver';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
 const patternCanvas: HTMLCanvasElement = document.createElement('canvas');
 const patternContext = patternCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+export function saveToPng(imageData: ImageData, name: string) {
+  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
+  bufferCanvas.toBlob((blob) => {
+    if (blob) {
+      FileSaver.saveAs(blob, `${name}.png`);      
+    } else { 
+      throw new Error('Unable to save image.');
+    }
+  });
+}
 
 export function getAllImageData(context: CanvasRenderingContext2D) {
   return context.getImageData(0, 0, context.canvas.width, context.canvas.height);

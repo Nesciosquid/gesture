@@ -7,6 +7,7 @@ import { ReduxState } from '../../reducers/index';
 import { ToolOptions } from '../../types/tools';
 import { Button } from 'reactstrap';
 import ToolButton from './ToolButton';
+import SaveButton from './SaveButton';
 import { getToolOptions, getColor } from '../../selectors/tools';
 
 interface ToolsPanelProps {
@@ -31,6 +32,8 @@ function ToolsPanel(props: ToolsPanelProps) {
       }
       <div style={{height: '50px' }} />
       <Button onClick={() => props.clear()}>Clear</Button>
+      <div style={{height: '50px' }} />
+      <SaveButton />
     </div>
   );
 }
