@@ -1,0 +1,12 @@
+{
+   "index": "index.html",
+   "region": "us-east-2",
+   "uploadDir": "./build",
+   "prefix": "",
+   "exclude": [],
+   "corsConfiguration": [],
+   "enableCloudfront": false,
+   "retries": 20,
+   "domain": "draw.aran.ink",
+   "configFile": ".s3-website.json"
+}

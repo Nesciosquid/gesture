@@ -3,7 +3,7 @@ import { DrawParams, DrawPosition } from '../types/canvas';
 import { getSelectedTool, getCurrentOpacity, getCurrentSize, getColor } from '../selectors/tools';
 
 export const actionTypes = {
-  setContext: 'CANVAS//SET_CONTEXT',
+  setImageData: 'CANVAS//SET_IMAGE_DATA',
   startDrawing: 'CANVAS//START_DRAWING',
   stopDrawing: 'CANVAS//STOP_DRAWING',
   draw: 'CANVAS//DRAW',
@@ -17,10 +17,10 @@ export interface RectParams {
   height: number;
 }
 
-export function setContext(ctx: CanvasRenderingContext2D) { //tslint:disable-line
+export function setImageData(imageData: ImageData) {
   return ({
-      type: actionTypes.setContext,
-      payload: ctx
+      type: actionTypes.setImageData,
+      payload: imageData
   });
 }
 

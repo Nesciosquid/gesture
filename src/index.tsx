@@ -15,8 +15,8 @@ import albums from './utils/defaultAlbums';
 import App from './ConnectedApp';
 import CanvasExample from './components/Drawing/CanvasApp';
 import * as Pressure from 'pressure';
+import { setImageData } from './actions/canvas';
 import { changePressure } from './actions/tools';
-import { setContext } from './actions/canvas';
 import * as ReduxThunk from 'redux-thunk';
 import { Switch, Route } from 'react-router-dom';
 import * as _ from 'lodash';
@@ -47,7 +47,7 @@ if (canvas) {
   if (context) {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-    store.dispatch(setContext(context));
+    store.dispatch(setImageData(new ImageData(canvas.width, canvas.height)));
   }
 }
 
@@ -58,4 +58,3 @@ Pressure.set('.pressure', {
   change: throttledSetChange,
   end: () => store.dispatch(changePressure(0, null))
 });
-

@@ -2,10 +2,10 @@ import { ReduxAction } from '../actions/index';
 import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
-import { drawCurves, drawLines, drawGradients, drawFromPattern } from '../utils/canvas';
+import { drawLines, drawGradients, drawFromPattern } from '../utils/canvas';
 
 export interface CanvasState {
-  context?: CanvasRenderingContext2D;
+  imageData?: ImageData;
   lastParams?: DrawParams;
   drawing: boolean;
   points: DrawPosition[];
@@ -16,8 +16,8 @@ export const DefaultCanvasState: CanvasState = {
   points: [],
 };
 
-function setContext(state: CanvasState, context: CanvasRenderingContext2D) {
-  return { ...state, context };
+function setImageData(state: CanvasState, imageData: ImageData) {
+  return { ...state, imageData };
 }
 
 function startDrawing(state: CanvasState, params: DrawParams) {
@@ -29,51 +29,45 @@ function stopDrawing(state: CanvasState) {
 }
 
 function draw(state: CanvasState, params: DrawParams) {
-  const context = state.context;  
-  if (!state.drawing || !context || !state.lastParams) {
+  if (!state.drawing || !state.lastParams) {
     return state;
   } 
-  if (params.tool.erase) {
-    context.globalCompositeOperation = 'destination-out';
-  } else {
-    context.globalCompositeOperation = 'source-over';
+  if (!state.imageData) {
+    throw new Error('No image data to work from!');
   }
-  context.globalAlpha = params.opacity;
+  const imageData = state.imageData;
+  let newImageData: ImageData;
   switch (params.tool.type) {
-    case (ToolType.CURVES): {
-      drawCurves(context, params, state.lastParams);
-      break;
-    }
     case (ToolType.PATTERN): {
-      drawFromPattern(context, params, state.lastParams);
+      newImageData = drawFromPattern(imageData, params, state.lastParams);
       break;
     } 
     case (ToolType.LINES): {
-      drawLines(context, params, state.lastParams);
+      newImageData = drawLines(imageData, params, state.lastParams);
       break;
     }
     case (ToolType.GRADIENTS): {
-      drawGradients(context, params, state.lastParams);
+      newImageData = drawGradients(imageData, params, state.lastParams);
       break;
     }
     default: {
-      drawLines(context, params, state.lastParams);
+      newImageData = imageData;
     }
   }
-  return { ...state, lastParams: params };
+  return { ...state, lastParams: params, imageData: newImageData};
 }
 
 function clear(state: CanvasState) {
-  if (state.context) {
-    state.context.clearRect(0, 0, state.context.canvas.width, state.context.canvas.height);
+  if (!state.imageData) {
+    return state;
   }
-  return state;
+  return { ...state, imageData: new ImageData(state.imageData.width, state.imageData.height)};
 }
 
 export default function(state: CanvasState = DefaultCanvasState, {type, payload}: ReduxAction): CanvasState {
     switch (type) {
-       case(actionTypes.setContext): {
-         return setContext(state, payload);
+       case(actionTypes.setImageData): {
+         return setImageData(state, payload);
        }
        case(actionTypes.draw): {
          return draw(state, payload);

@@ -2,7 +2,7 @@
   "name": "gesture-ts",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Nesciosquid.github.io/gesture/",
+  "homepage": "http://draw.aran.ink.s3-website.us-east-2.amazonaws.com",
   "dependencies": {
     "@types/history": "^4.6.2",
     "@types/query-string": "^5.0.1",
@@ -48,6 +48,7 @@
     "redux-logger": "^3.0.6",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",
+    "s3-website": "^3.3.0",
     "sass-loader": "^6.0.6",
     "source-map-loader": "^0.2.1",
     "style-loader": "0.18.2",
@@ -67,9 +68,9 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "pages": "gh-pages -d build",
     "test": "node scripts/test.js --env=jsdom",
-    "deploy": "yarn build & gh-pages -d build"
+    "s3-deploy": "s3-website deploy",
+    "deploy": "yarn build & yarn s3-deploy"
   },
   "devDependencies": {
     "@types/jest": "^21.1.6",
