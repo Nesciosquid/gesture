@@ -74,7 +74,12 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           this.props.draw({x, y});        
         }}
       >
-        <canvas ref={(canvas) => { this.canvas = canvas; }} id="canvas" style={{ flexGrow: 1}}/>
+        <canvas 
+          className="drawing-canvas" 
+          ref={(canvas) => { this.canvas = canvas; }} 
+          id="canvas" 
+          style={{ flexGrow: 1}}
+        />
       </div>
     );
   }

@@ -1,6 +1,7 @@
 import { RGBColor } from 'react-color';
 import { DrawPosition, DrawParams } from '../types/canvas';
 import Tool from '../types/tools/Tool';
+import lerp from 'lerp';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -61,8 +62,11 @@ function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, im
   }
 }
 
-export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams) {
-  context.globalAlpha = params.opacity;
+export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams, ratio: number) {
+  const opacity = lerp(lastParams.opacity, params.opacity, ratio);
+  const size = lerp(lastParams.size, params.size, ratio);
+  context.globalAlpha = opacity;
+  context.lineWidth = size;
   if (params.tool.erase) {
     context.globalCompositeOperation = 'destination-out';
   } else {
@@ -75,22 +79,27 @@ export function drawGradients(imageData: ImageData, params: DrawParams, lastPara
   const lastPosition = lastParams.position;
   const distance = distanceBetween(lastPosition, position);
   const angle = angleBetween(lastPosition, position);
-  const size = params.size;
-  const color = params.color;
-  const r = color.r;
-  const g = color.g;
-  const b = color.b;
-  const a = (color.a ? color.a : 1);
-  const startColor = `rgba(${r},${g},${b},${a})`;  
-  const midColor = `rgba(${r},${g},${b},${a * .5})`;  
-  const endColor = `rgba(${r},${g},${b},0)`;  
+
   initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
-  setGlobalParams(bufferContext, params);
 
   for (let i = 0; i < distance; i += 1) {
     const x = lastPosition.x + (Math.sin(angle) * i);
     const y = lastPosition.y + (Math.cos(angle) * i);
+    const ratio = i / distance;
+    setGlobalParams(bufferContext, params, lastParams, ratio);    
+    bufferContext.globalAlpha = 1;
+    const size = lerp(lastParams.size, params.size, ratio);
+    const opacity = lerp(lastParams.opacity, params.opacity, ratio);
+    const color = params.color;
+    const r = color.r;
+    const g = color.g;
+    const b = color.b;
+    const a = opacity;
+    const startColor = `rgba(${r},${g},${b},${a})`;  
+    const midColor = `rgba(${r},${g},${b},${a * .5})`;  
+    const endColor = `rgba(${r},${g},${b},0)`;  
     var gradient = bufferContext.createRadialGradient(x, y, size / 4, x, y, size / 2);    
+    
     gradient.addColorStop(0, startColor);
     gradient.addColorStop(0.5, midColor);
     gradient.addColorStop(1, endColor);
@@ -115,7 +124,6 @@ export function drawLines(imageData: ImageData, params: DrawParams, lastParams: 
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
-  setGlobalParams(bufferContext, params);
   drawLineSegments(context, 1, params, lastParams);
   return getAllImageData(context);
 }
@@ -130,6 +138,8 @@ export function drawLineSegments(context: CanvasRenderingContext2D, minDistance:
   let lastY = start.y;
   context.moveTo(start.x, start.y);    
   for (let z = 0 ; z < distance; z += minDistance ) {
+    const ratio = z / distance;
+    setGlobalParams(bufferContext, params, lastParams, ratio);    
     const x = start.x + (Math.sin(angle) * z);
     const y = start.y + (Math.cos(angle) * z);
     context.beginPath();
@@ -182,7 +192,6 @@ export function drawFromPattern(imageData: ImageData,
   context.lineWidth = params.size;
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
-  setGlobalParams(context, params);
   drawLineSegments(context, params.size / 2, params, lastParams);
   return bufferContext.getImageData(0, 0, imageData.width, imageData.height);
 }
