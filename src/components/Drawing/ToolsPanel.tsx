@@ -8,16 +8,26 @@ import { ToolOptions } from '../../types/tools';
 import { Button } from 'reactstrap';
 import ToolButton from './ToolButton';
 import SaveButton from './SaveButton';
+import { setTransformMatrix } from '../../actions/canvas';
+import { getTransformMatrix } from '../../selectors/canvas';
 import { getToolOptions, getColor } from '../../selectors/tools';
+import { TransformMatrix, Transform } from '../../utils/transform';
 
 interface ToolsPanelProps {
   color: RGBColor;
   setColor: (color: RGBColor) => void;
   clear: () => void;
   toolOptions: ToolOptions;
+  transformMatrix: TransformMatrix;
+  setTransformMatrix: (matrix: TransformMatrix) => void;
 }
 
 function ToolsPanel(props: ToolsPanelProps) {
+  const translateX = (x: number) => {
+    const transform = new Transform(props.transformMatrix);
+    const translated = transform.translate(x, 0);
+    props.setTransformMatrix(translated.matrix);
+  };
   return (
     <div className="tools-panel">
       <SketchPicker
@@ -31,6 +41,16 @@ function ToolsPanel(props: ToolsPanelProps) {
         })
       }
       <div style={{height: '50px' }} />
+      <Button 
+        onClick={() => translateX(10)}
+      >
+        Translate right
+      </Button>
+      <Button 
+        onClick={() => translateX(-10)}
+      >
+        Translate left
+      </Button>
       <Button onClick={() => props.clear()}>Clear</Button>
       <div style={{height: '50px' }} />
       <SaveButton />
@@ -41,14 +61,16 @@ function ToolsPanel(props: ToolsPanelProps) {
 function mapStateToProps(state: ReduxState) {
   return ({
     color: getColor(state),
-    toolOptions: getToolOptions(state)
+    toolOptions: getToolOptions(state),
+    transformMatrix: getTransformMatrix(state)
   });
 }
 
 function mapDispatchToProps(dispatch: Function) {
   return ({
     setColor: (color: RGBColor) => dispatch(setColor(color)),
-    clear: () => dispatch(clear())
+    clear: () => dispatch(clear()),
+    setTransformMatrix: (matrix: TransformMatrix) => dispatch(setTransformMatrix(matrix))
   });
 }
 

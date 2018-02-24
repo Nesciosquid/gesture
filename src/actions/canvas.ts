@@ -1,20 +1,23 @@
 import { ReduxState } from '../reducers/index';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { getSelectedTool, getCurrentOpacity, getCurrentSize, getColor } from '../selectors/tools';
+import { TransformMatrix } from '../utils/transform';
+import { isDrawing } from '../selectors/canvas';
 
 export const actionTypes = {
   setImageData: 'CANVAS//SET_IMAGE_DATA',
   startDrawing: 'CANVAS//START_DRAWING',
   stopDrawing: 'CANVAS//STOP_DRAWING',
   draw: 'CANVAS//DRAW',
-  clear: 'CANVAS//CLEAR'
+  clear: 'CANVAS//CLEAR',
+  setTransform: 'CANVAS//SET_TRANSFORM'
 };
 
-export interface RectParams {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+export function setTransformMatrix(matrix: TransformMatrix) {
+  return ({
+    type: actionTypes.setTransform,
+    payload: matrix
+  });
 }
 
 export function setImageData(imageData: ImageData) {
@@ -42,7 +45,9 @@ export function startDrawing(position: DrawPosition) {
   return (dispatch: Function, getState: () => ReduxState) => {
     const state = getState();
     const tool = getSelectedTool(state);
-    if (tool) {
+    const notDrawing = !isDrawing(state);
+    if (tool && notDrawing) {
+      console.log(position);      
       const opacity = getCurrentOpacity(state, tool);
       const size = getCurrentSize(state, tool);
       const color = getColor(state);
@@ -73,7 +78,8 @@ export function drawWithCurrentTool(position: DrawPosition) {
   return (dispatch: Function, getState: () => ReduxState) => {
     const state = getState();
     const tool = getSelectedTool(state);
-    if (tool) {
+    const drawing = isDrawing(state);
+    if (tool && drawing) {
       const opacity = getCurrentOpacity(state, tool);
       const size = getCurrentSize(state, tool);
       const color = getColor(state);

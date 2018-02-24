@@ -61,7 +61,7 @@ export function angleBetween(point1: DrawPosition, point2: DrawPosition) {
   return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
 
-function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, imageData?: ImageData) {
+export function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, imageData?: ImageData) {
   const context = canvas.getContext('2d');
   if (!context) {
     throw new Error('No buffer context found!');
@@ -74,7 +74,8 @@ function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, im
   }
 }
 
-export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams, ratio: number) {
+export function setGlobalParams(context: CanvasRenderingContext2D, 
+                                params: DrawParams, lastParams: DrawParams, ratio: number) {
   const opacity = lerp(lastParams.opacity, params.opacity, ratio);
   const size = lerp(lastParams.size, params.size, ratio);
   context.globalAlpha = opacity;
