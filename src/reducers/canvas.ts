@@ -3,24 +3,31 @@ import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { drawLines, drawGradients, drawFromPattern } from '../utils/canvas';
+import { TransformMatrix, Transform } from '../utils/transform';
 
 export interface CanvasState {
   imageData?: ImageData;
   lastParams?: DrawParams;
   drawing: boolean;
   points: DrawPosition[];
+  transformMatrix: TransformMatrix;
 }
 
 export const DefaultCanvasState: CanvasState = {
   drawing: false,
   points: [],
+  transformMatrix: new Transform().matrix
 };
+
+function setTransform(state: CanvasState, matrix: TransformMatrix) {
+  return { ...state, transformMatrix: matrix };
+}
 
 function setImageData(state: CanvasState, imageData: ImageData) {
   return { ...state, imageData };
 }
 
-function startDrawing(state: CanvasState, params: DrawParams) {
+function startDrawing(state: CanvasState, params: DrawParams): CanvasState {
   return { ... state, drawing: true, lastParams: params };
 }
 
@@ -77,6 +84,9 @@ export default function(state: CanvasState = DefaultCanvasState, {type, payload}
       }
       case(actionTypes.stopDrawing): {
         return stopDrawing(state);
+      }
+      case(actionTypes.setTransform): {
+        return setTransform(state, payload);
       }
       case(actionTypes.clear): {
         return clear(state);

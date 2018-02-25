@@ -4,32 +4,47 @@ import { TouchEvent, MouseEvent } from 'react';
 import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/canvas';
 import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
-import { getImageData } from '../../selectors/canvas';
+import { getImageData, getTransformMatrix } from '../../selectors/canvas';
+import { initCanvas } from '../../utils/canvas';
+import { TransformMatrix, Transform } from '../../utils/transform';
+// import { getImage } from '../../utils/canvas';
 
 interface DrawingCanvasProps {
   startDrawing: (position: DrawPosition) => void;
   stopDrawing: () => void;
   draw: (position: DrawPosition) => void;
   imageData: ImageData;
+  transformMatrix: TransformMatrix;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
   canvas: HTMLCanvasElement | null;
+  bufferCanvas: HTMLCanvasElement;
+  constructor(props: DrawingCanvasProps) {
+    super(props);
+    this.bufferCanvas = document.createElement('canvas');
+  }
   componentDidMount() {
-    this.redrawCanvas(this.props.imageData);
+    const { imageData, transformMatrix } = this.props;
+    this.redrawCanvas(imageData, transformMatrix);
   }
   componentWillReceiveProps(nextProps: DrawingCanvasProps) {
-    this.redrawCanvas(nextProps.imageData);
+    const { imageData, transformMatrix } = nextProps;
+    this.redrawCanvas(imageData, transformMatrix);
   }
-  redrawCanvas = (imageData: ImageData) => {
+  redrawCanvas = async (imageData: ImageData, matrix: TransformMatrix) => {
     if (this.canvas && imageData) {
       const context = this.canvas.getContext('2d');
       if (context) {
-        context.putImageData(imageData, 0, 0);
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
+        initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);        
+        context.drawImage(this.bufferCanvas, 0, 0);
       }
     }
   }
   render() {
+    const transform = new Transform(this.props.transformMatrix);
     return (
       <div 
         className="pressure"
@@ -39,7 +54,8 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           const touch = event.touches[0];
           const x = touch.clientX - 220;
           const y = touch.clientY;
-          this.props.startDrawing({x, y});
+          const position = transform.invert().transformPoint({ x, y });  
+          this.props.startDrawing(position);
         }}
         onTouchEnd={(event: TouchEvent<HTMLDivElement>) => {
           event.preventDefault();
@@ -52,14 +68,16 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           const touch = event.touches[0];
           const x = touch.clientX - 220;
           const y = touch.clientY;
-          this.props.draw({x, y});
+          const position = transform.invert().transformPoint({ x, y });  
+          this.props.draw(position);
         }}
         onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
           event.preventDefault();
           event.stopPropagation();
           const x = event.clientX - 220;
           const y = event.clientY;
-          this.props.startDrawing({x, y});
+          const position = transform.invert().transformPoint({ x, y });  
+          this.props.startDrawing(position);
         }}
         onMouseUp={(event: MouseEvent<HTMLDivElement>) => {
           event.preventDefault();
@@ -71,7 +89,8 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
           event.stopPropagation();
           const x = event.clientX - 220;
           const y = event.clientY;
-          this.props.draw({x, y});        
+          const position = transform.invert().transformPoint({ x, y });  
+          this.props.draw(position);        
         }}
       >
         <canvas 
@@ -86,7 +105,8 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
 }
 
 const mapStateToProps = (state: ReduxState) => ({
-  imageData: getImageData(state)
+  imageData: getImageData(state),
+  transformMatrix: getTransformMatrix(state)
 });
 
 const mapDispatchToProps = (dispatch: Function) => ({
