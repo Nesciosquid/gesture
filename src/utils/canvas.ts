@@ -61,6 +61,36 @@ export function angleBetween(point1: DrawPosition, point2: DrawPosition) {
   return Math.atan2( point2.x - point1.x, point2.y - point1.y );
 }
 
+export interface DrawBounds {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  width: number;
+  height: number;
+}
+
+export function getBounds(point1: DrawPosition, point2: DrawPosition,
+                          size1: number, size2: number, width: number, height: number): DrawBounds {
+  const minX = Math.min(point1.x, point2.x);
+  const minY = Math.min(point1.y, point2.y);
+  const maxX = Math.max(point1.x, point2.x);
+  const maxY = Math.max(point1.y, point2.y);
+  const maxSize = Math.max(size1, size2);
+  const minXLimit = Math.max(0, Math.floor(minX - maxSize / 2));
+  const maxXLimit = Math.min(width, Math.ceil(maxX + maxSize / 2));
+  const minYLimit = Math.max(0, Math.floor(minY - maxSize / 2));
+  const maxYLimit = Math.min(height, Math.ceil(maxY + maxSize / 2));
+  return {
+    minX: minXLimit,
+    maxX: maxXLimit,
+    minY: minYLimit,
+    maxY: maxYLimit,
+    width: maxXLimit - minXLimit,
+    height: maxYLimit - minYLimit
+  };
+}
+
 function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, imageData?: ImageData) {
   const context = canvas.getContext('2d');
   if (!context) {
@@ -74,7 +104,8 @@ function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, im
   }
 }
 
-export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams, ratio: number) {
+export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams, 
+                                lastParams: DrawParams, ratio: number) {
   const opacity = lerp(lastParams.opacity, params.opacity, ratio);
   const size = lerp(lastParams.size, params.size, ratio);
   context.globalAlpha = opacity;
@@ -86,17 +117,54 @@ export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawP
   }
 }
 
+export function getBoundsIndices(imageData: ImageData, 
+                                 bounds: DrawBounds, channels: number) {
+  const startXOffset = bounds.minX * 4;
+  const startYOffset = bounds.minY * 4 * imageData.width;
+  const endXOffset = bounds.maxX * 4;
+  const endYOffset = bounds.maxY * 4 * imageData.width;
+  const startIndex = startXOffset + startYOffset;
+  const endIndex = endXOffset + endYOffset + 4;
+  return {
+    startIndex,
+    endIndex
+  };
+}
+
+export function getPartialImageData(imageData: ImageData, bounds: DrawBounds) {
+  const indices = getBoundsIndices(imageData, bounds, 4);
+  const pixels = imageData.data.slice(indices.startIndex, indices.endIndex);
+  if (ImageData) {
+    return new ImageData(pixels, bounds.width, bounds.height);
+  } else {
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      data: pixels
+    };
+  }
+}
+
 export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams) {
   const position = params.position;
   const lastPosition = lastParams.position;
   const distance = distanceBetween(lastPosition, position);
   const angle = angleBetween(lastPosition, position);
+  const bounds = getBounds(
+    params.position, 
+    lastParams.position, 
+    params.size, 
+    lastParams.size, 
+    imageData.width, 
+    imageData.height
+  );
+  const partialImageData = getPartialImageData(imageData, bounds);
 
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
+  initCanvas(bufferCanvas, partialImageData.width, partialImageData.height, partialImageData);
 
   for (let i = 0; i < distance; i += 1) {
-    const x = lastPosition.x + (Math.sin(angle) * i);
-    const y = lastPosition.y + (Math.cos(angle) * i);
+    const x = lastPosition.x + (Math.sin(angle) * i) - bounds.minX;
+    const y = lastPosition.y + (Math.cos(angle) * i) - bounds.minY;
     const ratio = i / distance;
     setGlobalParams(bufferContext, params, lastParams, ratio);    
     bufferContext.globalAlpha = 1;
@@ -119,7 +187,15 @@ export function drawGradients(imageData: ImageData, params: DrawParams, lastPara
     bufferContext.fillRect(x - params.size / 2, y - params.size / 2, size, size);
   }
 
-  return getAllImageData(bufferContext);
+  const newImageData = bufferContext.getImageData(0, 0, partialImageData.width, partialImageData.height);
+  return insertImageData(imageData, newImageData, bounds);
+}
+
+export function insertImageData(target: ImageData, source: ImageData, bounds: DrawBounds) {
+  const data = target.data.slice();
+  const indices = getBoundsIndices(target, bounds, 4);
+  data.set(source.data, indices.startIndex);
+  return new ImageData(data, target.width, target.height);
 }
 
 export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
