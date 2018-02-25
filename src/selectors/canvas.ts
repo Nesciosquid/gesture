@@ -11,3 +11,7 @@ export function getTransformMatrix(state: ReduxState) {
 export function isDrawing(state: ReduxState) {
   return state.canvas.drawing;
 }
+
+export function getDirtyBounds(state: ReduxState) {
+  return state.canvas.dirtyBounds;
+}

@@ -3,11 +3,18 @@ import { DrawPosition, DrawParams } from '../types/canvas';
 import Tool from '../types/tools/Tool';
 import lerp from 'lerp';
 import * as FileSaver from 'file-saver';
+import * as _ from 'lodash';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
 const patternCanvas: HTMLCanvasElement = document.createElement('canvas');
 const patternContext = patternCanvas.getContext('2d') as CanvasRenderingContext2D;
+
+export interface ImageDataWrapper {
+  data: Uint8ClampedArray;
+  width: number;
+  height: number;
+}
 
 export function saveToPng(imageData: ImageData, name: string) {
   initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
@@ -37,7 +44,7 @@ export async function updateGrainImage(tool: Tool, color: RGBColor): Promise<Too
   };
 }
 
-export async function colorizeImageData(imageData: ImageData, color: RGBColor) {
+export async function colorizeImageData(imageData: ImageDataWrapper, color: RGBColor) {
   const data = imageData.data;
   const pixelValues = new Uint8ClampedArray(data.length);
   for (var j = 0; j < data.length; j += 4) {
@@ -72,15 +79,21 @@ export interface DrawBounds {
 
 export function getBounds(point1: DrawPosition, point2: DrawPosition,
                           size1: number, size2: number, width: number, height: number): DrawBounds {
-  const minX = Math.min(point1.x, point2.x);
-  const minY = Math.min(point1.y, point2.y);
-  const maxX = Math.max(point1.x, point2.x);
-  const maxY = Math.max(point1.y, point2.y);
-  const maxSize = Math.max(size1, size2);
-  const minXLimit = Math.max(0, Math.floor(minX - maxSize / 2));
-  const maxXLimit = Math.min(width, Math.ceil(maxX + maxSize / 2));
-  const minYLimit = Math.max(0, Math.floor(minY - maxSize / 2));
-  const maxYLimit = Math.min(height, Math.ceil(maxY + maxSize / 2));
+  const sizeOffset = Math.ceil(Math.max(size1, size2) / 2);                            
+  if (sizeOffset < 0 ) {
+    throw new Error(`Size cannot be negative: ${size1}, ${size2}`);
+  }
+  if (width < 0 || height < 0 ) {
+    throw new Error(`Width and height cannot be negative: ${width}, ${height}`);
+  }
+  const minX = Math.min(point1.x, point2.x) - sizeOffset;
+  const minY = Math.min(point1.y, point2.y) - sizeOffset;
+  const maxX = Math.max(point1.x, point2.x) + sizeOffset + 1;
+  const maxY = Math.max(point1.y, point2.y) + sizeOffset + 1;
+  const minXLimit = _.clamp(minX, 0, width);
+  const maxXLimit = _.clamp(maxX, 0, width);
+  const minYLimit = _.clamp(minY, 0, width);
+  const maxYLimit = _.clamp(maxY, 0, width);
   return {
     minX: minXLimit,
     maxX: maxXLimit,
@@ -91,7 +104,7 @@ export function getBounds(point1: DrawPosition, point2: DrawPosition,
   };
 }
 
-function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, imageData?: ImageData) {
+export function initCanvas(canvas: HTMLCanvasElement, width: number, height: number, imageData?: ImageData) {
   const context = canvas.getContext('2d');
   if (!context) {
     throw new Error('No buffer context found!');
@@ -117,54 +130,57 @@ export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawP
   }
 }
 
-export function getBoundsIndices(imageData: ImageData, 
-                                 bounds: DrawBounds, channels: number) {
-  const startXOffset = bounds.minX * 4;
-  const startYOffset = bounds.minY * 4 * imageData.width;
-  const endXOffset = bounds.maxX * 4;
-  const endYOffset = bounds.maxY * 4 * imageData.width;
-  const startIndex = startXOffset + startYOffset;
-  const endIndex = endXOffset + endYOffset + 4;
+export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
+                                    bounds: DrawBounds): ImageDataWrapper {
+  const newData = targetImageData.data.slice();
+  for (let i = bounds.minY; i < bounds.maxY; i++) {
+    const yOffset = i * targetImageData.width * 4;
+    const xStartOffset = bounds.minX * 4;
+    const startIndex = yOffset + xStartOffset;
+
+    const partialDataStartIndex = (i - bounds.minY) * bounds.width * 4;
+    const partialDataEndIndex = partialDataStartIndex + bounds.width * 4;
+    const rowData = partialData.data.slice(partialDataStartIndex, partialDataEndIndex);
+    newData.set(rowData, startIndex);
+  }
   return {
-    startIndex,
-    endIndex
+    data: newData,
+    width: targetImageData.width,
+    height: targetImageData.height
   };
 }
 
-export function getPartialImageData(imageData: ImageData, bounds: DrawBounds) {
-  const indices = getBoundsIndices(imageData, bounds, 4);
-  const pixels = imageData.data.slice(indices.startIndex, indices.endIndex);
-  if (ImageData) {
-    return new ImageData(pixels, bounds.width, bounds.height);
-  } else {
-    return {
-      width: bounds.width,
-      height: bounds.height,
-      data: pixels
-    };
+export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBounds): ImageDataWrapper {
+  const newData = new Uint8ClampedArray(bounds.height * bounds.width * 4);
+  for (let i = bounds.minY; i < bounds.maxY; i++) {
+    const yOffset = i * imageData.width * 4;
+    const xStartOffset = bounds.minX * 4;
+    const xEndOffset = xStartOffset + bounds.width * 4;
+    const startIndex = yOffset + xStartOffset;
+    const endIndex = yOffset + xEndOffset;
+    const rowData = imageData.data.slice(startIndex, endIndex);
+    const targetIndex = (i - bounds.minY) * bounds.width * 4;
+    newData.set(rowData, targetIndex);
   }
+  return {
+    data: newData,
+    width: bounds.width,
+    height: bounds.height
+  };
 }
 
-export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams) {
+export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
   const position = params.position;
   const lastPosition = lastParams.position;
   const distance = distanceBetween(lastPosition, position);
   const angle = angleBetween(lastPosition, position);
-  const bounds = getBounds(
-    params.position, 
-    lastParams.position, 
-    params.size, 
-    lastParams.size, 
-    imageData.width, 
-    imageData.height
-  );
-  const partialImageData = getPartialImageData(imageData, bounds);
 
-  initCanvas(bufferCanvas, partialImageData.width, partialImageData.height, partialImageData);
+  initCanvas(bufferCanvas, imageData.width, imageData.height, 
+             new ImageData(imageData.data, imageData.width, imageData.height));
 
   for (let i = 0; i < distance; i += 1) {
-    const x = lastPosition.x + (Math.sin(angle) * i) - bounds.minX;
-    const y = lastPosition.y + (Math.cos(angle) * i) - bounds.minY;
+    const x = lastPosition.x + (Math.sin(angle) * i);
+    const y = lastPosition.y + (Math.cos(angle) * i);
     const ratio = i / distance;
     setGlobalParams(bufferContext, params, lastParams, ratio);    
     bufferContext.globalAlpha = 1;
@@ -187,15 +203,7 @@ export function drawGradients(imageData: ImageData, params: DrawParams, lastPara
     bufferContext.fillRect(x - params.size / 2, y - params.size / 2, size, size);
   }
 
-  const newImageData = bufferContext.getImageData(0, 0, partialImageData.width, partialImageData.height);
-  return insertImageData(imageData, newImageData, bounds);
-}
-
-export function insertImageData(target: ImageData, source: ImageData, bounds: DrawBounds) {
-  const data = target.data.slice();
-  const indices = getBoundsIndices(target, bounds, 4);
-  data.set(source.data, indices.startIndex);
-  return new ImageData(data, target.width, target.height);
+  return getAllImageData(bufferContext);
 }
 
 export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {

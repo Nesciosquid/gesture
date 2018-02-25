@@ -4,8 +4,8 @@ import { TouchEvent, MouseEvent } from 'react';
 import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/canvas';
 import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
-import { getImageData, getTransformMatrix } from '../../selectors/canvas';
-import { initCanvas } from '../../utils/canvas';
+import { getImageData, getTransformMatrix, getDirtyBounds } from '../../selectors/canvas';
+import { initCanvas, DrawBounds, getPartialImageData } from '../../utils/canvas';
 import { TransformMatrix, Transform } from '../../utils/transform';
 // import { getImage } from '../../utils/canvas';
 
@@ -15,6 +15,7 @@ interface DrawingCanvasProps {
   draw: (position: DrawPosition) => void;
   imageData: ImageData;
   transformMatrix: TransformMatrix;
+  dirtyBounds: DrawBounds | undefined;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
@@ -25,21 +26,30 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
     this.bufferCanvas = document.createElement('canvas');
   }
   componentDidMount() {
-    const { imageData, transformMatrix } = this.props;
-    this.redrawCanvas(imageData, transformMatrix);
+    const { imageData, transformMatrix, dirtyBounds } = this.props;
+    this.redrawCanvas(imageData, transformMatrix, dirtyBounds);
   }
   componentWillReceiveProps(nextProps: DrawingCanvasProps) {
-    const { imageData, transformMatrix } = nextProps;
-    this.redrawCanvas(imageData, transformMatrix);
+    const { imageData, transformMatrix, dirtyBounds } = nextProps;
+    this.redrawCanvas(imageData, transformMatrix, dirtyBounds);
   }
-  redrawCanvas = async (imageData: ImageData, matrix: TransformMatrix) => {
+  redrawCanvas = async (imageData: ImageData, matrix: TransformMatrix, dirtyBounds?: DrawBounds) => {
     if (this.canvas && imageData) {
       const context = this.canvas.getContext('2d');
       if (context) {
-        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
-        initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);        
-        context.drawImage(this.bufferCanvas, 0, 0);
+        if (dirtyBounds) {
+          context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
+          context.clearRect(dirtyBounds.minX, dirtyBounds.minY, dirtyBounds.width, dirtyBounds.height);          
+          const dirtyImageData = new ImageData(getPartialImageData(imageData, dirtyBounds).data, 
+                                               dirtyBounds.width, dirtyBounds.height);
+          initCanvas(this.bufferCanvas, dirtyBounds.width, dirtyBounds.height, dirtyImageData);
+          context.drawImage(this.bufferCanvas, dirtyBounds.minX, dirtyBounds.minY);
+        } else {
+          context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
+          context.clearRect(0, 0, this.canvas.width, this.canvas.height);          
+          initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);        
+          context.drawImage(this.bufferCanvas, 0, 0);
+        }
       }
     }
   }
@@ -106,7 +116,8 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
 
 const mapStateToProps = (state: ReduxState) => ({
   imageData: getImageData(state),
-  transformMatrix: getTransformMatrix(state)
+  transformMatrix: getTransformMatrix(state),
+  dirtyBounds: getDirtyBounds(state),
 });
 
 const mapDispatchToProps = (dispatch: Function) => ({

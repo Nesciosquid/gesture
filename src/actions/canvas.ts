@@ -47,7 +47,6 @@ export function startDrawing(position: DrawPosition) {
     const tool = getSelectedTool(state);
     const notDrawing = !isDrawing(state);
     if (tool && notDrawing) {
-      console.log(position);      
       const opacity = getCurrentOpacity(state, tool);
       const size = getCurrentSize(state, tool);
       const color = getColor(state);
