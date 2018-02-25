@@ -1,4 +1,10 @@
-.pressure {
+.draw-wrapper {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+}
+
+.transform-wrapper {
   flex-grow: 1;
   height: 100%;
   display: flex;

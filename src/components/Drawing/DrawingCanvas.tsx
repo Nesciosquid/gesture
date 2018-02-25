@@ -1,25 +1,18 @@
 import * as React from 'react';
-import * as _ from 'lodash';
 import { connect } from 'react-redux';
-import { TouchEvent, MouseEvent } from 'react';
-import { startDrawing, stopDrawing, drawWithCurrentTool, setImageData } from '../../actions/canvas';
-import { DrawPosition } from '../../types/canvas/index';
+import { setImageData } from '../../actions/canvas';
 import { ReduxState } from '../../reducers/index';
 import { getImageData, getTransformMatrix, getDirtyBounds } from '../../selectors/canvas';
 import { initCanvas, DrawBounds, getPartialImageData } from '../../utils/canvas';
-import { TransformMatrix, Transform } from '../../utils/transform';
-import * as Pressure from 'pressure';
-import { changePressure } from '../../actions/tools';
+import { TransformMatrix } from '../../utils/transform';
+import DrawingActionWrapper from './DrawingActionWrapper';
+import TransformActionWrapper from './TransformActionWrapper';
 
 interface DrawingCanvasProps {
-  startDrawing: (position: DrawPosition) => void;
-  stopDrawing: () => void;
-  draw: (position: DrawPosition) => void;
   imageData: ImageData;
   transformMatrix: TransformMatrix;
   dirtyBounds: DrawBounds | undefined;
   setImageData: (imageData: ImageData) => void;
-  changePressure: (force: number, event: Event | null) => void;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
@@ -30,17 +23,13 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
     this.bufferCanvas = document.createElement('canvas');
   }
   initCanvas() {
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    if (canvas) {
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
-      this.props.setImageData(new ImageData(canvas.width, canvas.height));
+    if (this.canvas) {
+      this.canvas.width = this.canvas.clientWidth;
+      this.canvas.height = this.canvas.clientHeight;
+      this.props.setImageData(new ImageData(this.canvas.width, this.canvas.height));
+    } else {
+      throw new Error('No canvas found.');
     }
-    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 5);
-    Pressure.set('.pressure', {
-      change: throttledSetChange,
-      end: () => this.props.changePressure(0, null)
-    });    
   }
   componentDidMount() {
     this.initCanvas();
@@ -57,77 +46,31 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
       if (context) {
         if (dirtyBounds) {
           context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
-          context.clearRect(dirtyBounds.minX, dirtyBounds.minY, dirtyBounds.width, dirtyBounds.height);          
+          context.globalCompositeOperation = 'destination-in';          
+          context.fillStyle = 'red';
+          context.fillRect(0, 0, imageData.width, imageData.height);
+          context.globalCompositeOperation = 'source-over';
+          context.clearRect(dirtyBounds.minX, dirtyBounds.minY, dirtyBounds.width, dirtyBounds.height);       
           const dirtyImageData = new ImageData(getPartialImageData(imageData, dirtyBounds).data, 
                                                dirtyBounds.width, dirtyBounds.height);
+
           initCanvas(this.bufferCanvas, dirtyBounds.width, dirtyBounds.height, dirtyImageData);
           context.drawImage(this.bufferCanvas, dirtyBounds.minX, dirtyBounds.minY);
-        } else {
-          context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
-          context.clearRect(0, 0, this.canvas.width, this.canvas.height);          
-          initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);        
-          context.drawImage(this.bufferCanvas, 0, 0);
         }
       }
     }
   }
   render() {
-    const transform = new Transform(this.props.transformMatrix);
     return (
-      <div 
-        className="pressure"
-        onTouchStart={(event: TouchEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const touch = event.touches[0];
-          const x = touch.clientX - 220;
-          const y = touch.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          this.props.startDrawing(position);
-        }}
-        onTouchEnd={(event: TouchEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.props.stopDrawing();
-        }}
-        onTouchMove={(event: TouchEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const touch = event.touches[0];
-          const x = touch.clientX - 220;
-          const y = touch.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          this.props.draw(position);
-        }}
-        onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const x = event.clientX - 220;
-          const y = event.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          this.props.startDrawing(position);
-        }}
-        onMouseUp={(event: MouseEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          this.props.stopDrawing();
-        }}      
-        onMouseMove={(event: MouseEvent<HTMLDivElement>) => {
-          event.preventDefault();
-          event.stopPropagation();
-          const x = event.clientX - 220;
-          const y = event.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          this.props.draw(position);        
-        }}
-      >
-        <canvas 
-          className="drawing-canvas" 
-          ref={(canvas) => { this.canvas = canvas; }} 
-          id="canvas" 
-          style={{ flexGrow: 1}}
-        />
-      </div>
+      <TransformActionWrapper>
+        <DrawingActionWrapper>
+          <canvas 
+            className="drawing-canvas"
+            ref={(canvas) => { this.canvas = canvas; }} 
+            style={{ flexGrow: 1}}
+          />
+        </DrawingActionWrapper>
+      </TransformActionWrapper>
     );
   }
 }
@@ -139,21 +82,9 @@ const mapStateToProps = (state: ReduxState) => ({
 });
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  draw: (position: DrawPosition) => {
-    dispatch(drawWithCurrentTool(position));
-  },
-  stopDrawing: () => { 
-    dispatch(stopDrawing());
-  },
-  startDrawing: (position: DrawPosition) => {
-    dispatch(startDrawing(position));
-  },
   setImageData: (imageData: ImageData) => {
     dispatch(setImageData(imageData));
   },
-  changePressure: (force: number, event: Event | null) => {
-    dispatch(changePressure(force, event));
-  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DrawingCanvas);

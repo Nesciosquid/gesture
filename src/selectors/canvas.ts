@@ -15,3 +15,7 @@ export function isDrawing(state: ReduxState) {
 export function getDirtyBounds(state: ReduxState) {
   return state.canvas.dirtyBounds;
 }
+
+export function getStoredTransform(state: ReduxState) {
+  return state.canvas.storedTransform;
+}

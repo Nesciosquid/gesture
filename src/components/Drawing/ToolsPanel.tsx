@@ -12,6 +12,7 @@ import { setTransformMatrix } from '../../actions/canvas';
 import { getTransformMatrix } from '../../selectors/canvas';
 import { getToolOptions, getColor } from '../../selectors/tools';
 import { TransformMatrix, Transform } from '../../utils/transform';
+import HammerActionViewer from './HammerActionViewer';
 
 interface ToolsPanelProps {
   color: RGBColor;
@@ -27,6 +28,10 @@ function ToolsPanel(props: ToolsPanelProps) {
     const transform = new Transform(props.transformMatrix);
     const translated = transform.translate(x, 0);
     props.setTransformMatrix(translated.matrix);
+  };
+  const rotate = (angle: number) => {
+    const transform = new Transform(props.transformMatrix);
+    props.setTransformMatrix(transform.rotate(angle).matrix);
   };
   return (
     <div className="tools-panel">
@@ -51,8 +56,19 @@ function ToolsPanel(props: ToolsPanelProps) {
       >
         Translate left
       </Button>
+      <Button 
+        onClick={() => rotate(Math.PI / 10)}
+      >
+        Rotate right
+      </Button>
+      <Button 
+        onClick={() => rotate(-Math.PI / 10)}
+      >
+        Rotate left
+      </Button>
       <Button onClick={() => props.clear()}>Clear</Button>
       <div style={{height: '50px' }} />
+      <HammerActionViewer />
       <SaveButton />
     </div>
   );

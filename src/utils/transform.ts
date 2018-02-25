@@ -81,6 +81,9 @@ export class Transform {
     matrix.skX = this.matrix.skX * x;
     matrix.skY = this.matrix.skY * y;
     matrix.scY = this.matrix.scY * y;
+    matrix.tX = this.matrix.tX;
+    matrix.tY = this.matrix.tY;
+    return new Transform(matrix as TransformMatrix);
   }
 
   toArray = () => {

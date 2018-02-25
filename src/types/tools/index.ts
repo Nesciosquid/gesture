@@ -6,6 +6,7 @@ export enum ToolType {
   PATTERN,
   LINES,
   GRADIENTS,
+  TARGET
 }
 
 export type ToolOptions = ({[id: string]: Tool});

@@ -44,3 +44,7 @@ export function getCurrentSize(state: ReduxState, tool: Tool): number {
   const sizeRatio = Pressure.map(pressure, 0, 1, tool.minSizeRatio, tool.maxSizeRatio);
   return tool.currentSize * sizeRatio;
 }
+
+export function getLastHammerAction(state: ReduxState) {
+  return state.tools.lastHammerAction;
+}

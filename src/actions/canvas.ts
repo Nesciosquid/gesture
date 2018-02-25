@@ -10,8 +10,23 @@ export const actionTypes = {
   stopDrawing: 'CANVAS//STOP_DRAWING',
   draw: 'CANVAS//DRAW',
   clear: 'CANVAS//CLEAR',
-  setTransform: 'CANVAS//SET_TRANSFORM'
+  setTransform: 'CANVAS//SET_TRANSFORM',
+  storeTransform: 'CANVAS//STORE_TRANSFORM',
+  clearStoredTransform: 'CANVAS//CLEAR_STORED_TRANSFORM'
 };
+
+export function clearStoredTransform() {
+  return ({
+    type: actionTypes.clearStoredTransform,
+  });
+}
+
+export function storeTransform(matrix: TransformMatrix) {
+  return ({
+    type: actionTypes.storeTransform,
+    payload: matrix
+  });
+}
 
 export function setTransformMatrix(matrix: TransformMatrix) {
   return ({

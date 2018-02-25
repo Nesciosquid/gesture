@@ -11,12 +11,23 @@ export const actionTypes = {
     setToolSize: 'TOOLS//SET_TOOL_SIZE',
     setToolOpacity: 'TOOLS//SET_TOOL_OPACITY',
     setColor: 'TOOLS//SET_COLOR',
+    logHammerAction: 'TOOLS//LOG_HAMMER_ACTION',
 };
 
 export function __setColor(color: RGBColor) {
   return ({
     type: actionTypes.setColor,
     payload: color
+  });
+}
+
+export function logHammerAction(actionType: string, event: HammerInput) {
+  return ({
+    type: actionTypes.logHammerAction,
+    payload: {
+      actionType,
+      event
+    }
   });
 }
 

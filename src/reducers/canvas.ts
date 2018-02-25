@@ -3,7 +3,7 @@ import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { drawLines, drawGradients, drawFromPattern, getBounds,
-   getPartialImageData, putPartialImageData, DrawBounds } from '../utils/canvas';
+   getPartialImageData, putPartialImageData, DrawBounds, drawTarget } from '../utils/canvas';
 import { TransformMatrix, Transform } from '../utils/transform';
 
 export interface CanvasState {
@@ -13,6 +13,7 @@ export interface CanvasState {
   drawing: boolean;
   points: DrawPosition[];
   transformMatrix: TransformMatrix;
+  storedTransform?: TransformMatrix;
 }
 
 export const DefaultCanvasState: CanvasState = {
@@ -21,11 +22,19 @@ export const DefaultCanvasState: CanvasState = {
   transformMatrix: new Transform().matrix
 };
 
-function setTransform(state: CanvasState, matrix: TransformMatrix) {
-  return { ...state, transformMatrix: matrix };
+function clearStoredTransform(state: CanvasState): CanvasState {
+  return { ...state, storedTransform: undefined };
 }
 
-function setImageData(state: CanvasState, imageData: ImageData) {
+function storeTransform(state: CanvasState, matrix: TransformMatrix): CanvasState {
+  return { ...state, storedTransform: matrix };
+}
+
+function setTransform(state: CanvasState, matrix: TransformMatrix): CanvasState {
+  return { ...state, transformMatrix: matrix, dirtyBounds: getFullDrawBounds(state) };
+}
+
+function setImageData(state: CanvasState, imageData: ImageData): CanvasState {
   return { ...state, imageData };
 }
 
@@ -33,11 +42,11 @@ function startDrawing(state: CanvasState, params: DrawParams): CanvasState {
   return { ... state, drawing: true, lastParams: params };
 }
 
-function stopDrawing(state: CanvasState) {
+function stopDrawing(state: CanvasState): CanvasState {
   return { ... state, drawing: false, points: [] };
 }
 
-function draw(state: CanvasState, params: DrawParams) {
+function draw(state: CanvasState, params: DrawParams): CanvasState {
   if (!state.drawing || !state.lastParams) {
     return state;
   } 
@@ -51,6 +60,8 @@ function draw(state: CanvasState, params: DrawParams) {
   if (bounds.width === 0 || bounds.height === 0) {
     return { ...state, lastParams: params, imageData: imageData };
   }
+  console.log('params', params);
+  console.log(bounds);
   const partialImageData = new ImageData(getPartialImageData(imageData, bounds).data, bounds.width, bounds.height);
   const lastPosition = lastParams.position;
   const nextPosition = params.position;
@@ -69,6 +80,12 @@ function draw(state: CanvasState, params: DrawParams) {
       modifiedPartialData = drawLines(partialImageData, adjustedNextParams, adjustedLastParams);
       break;
     }
+    case (ToolType.TARGET): {
+      modifiedPartialData = drawTarget(partialImageData, adjustedNextParams, adjustedLastParams);
+      const part = putPartialImageData(imageData, modifiedPartialData, bounds);
+      const d = new ImageData(part.data, part.width, part.height);
+      return { ...state, lastParams: params, imageData: d, dirtyBounds: getFullDrawBounds(state)};
+    }
     case (ToolType.GRADIENTS): {
       modifiedPartialData = drawGradients(partialImageData, adjustedNextParams, adjustedLastParams);
       break;
@@ -83,9 +100,9 @@ function draw(state: CanvasState, params: DrawParams) {
   return { ...state, lastParams: params, imageData: newImageData, dirtyBounds: bounds};
 }
 
-function clear(state: CanvasState) {
+function getFullDrawBounds(state: CanvasState) {
   if (!state.imageData) {
-    return state;
+    throw new Error('no image data found');
   }
   const bounds: DrawBounds = {
     minX: 0,
@@ -95,6 +112,14 @@ function clear(state: CanvasState) {
     width: state.imageData.width,
     height: state.imageData.height
   };
+  return bounds;
+}
+
+function clear(state: CanvasState): CanvasState {
+  if (!state.imageData) {
+    return state;
+  }
+  const bounds = getFullDrawBounds(state);
   return { ...state, imageData: new ImageData(state.imageData.width, state.imageData.height), dirtyBounds: bounds };
 }
 
@@ -117,6 +142,12 @@ export default function(state: CanvasState = DefaultCanvasState, {type, payload}
       }
       case(actionTypes.clear): {
         return clear(state);
+      }
+      case(actionTypes.storeTransform): {
+        return storeTransform(state, payload);
+      }
+      case(actionTypes.clearStoredTransform): {
+        return clearStoredTransform(state);
       }
       default:
         return state;

@@ -44,7 +44,7 @@ export async function updateGrainImage(tool: Tool, color: RGBColor): Promise<Too
   };
 }
 
-export async function colorizeImageData(imageData: ImageDataWrapper, color: RGBColor) {
+export function colorizeImageData(imageData: ImageDataWrapper, color: RGBColor) {
   const data = imageData.data;
   const pixelValues = new Uint8ClampedArray(data.length);
   for (var j = 0; j < data.length; j += 4) {
@@ -86,10 +86,10 @@ export function getBounds(point1: DrawPosition, point2: DrawPosition,
   if (width < 0 || height < 0 ) {
     throw new Error(`Width and height cannot be negative: ${width}, ${height}`);
   }
-  const minX = Math.min(point1.x, point2.x) - sizeOffset;
-  const minY = Math.min(point1.y, point2.y) - sizeOffset;
-  const maxX = Math.max(point1.x, point2.x) + sizeOffset + 1;
-  const maxY = Math.max(point1.y, point2.y) + sizeOffset + 1;
+  const minX = Math.floor(Math.min(point1.x, point2.x) - sizeOffset);
+  const minY = Math.floor(Math.min(point1.y, point2.y) - sizeOffset);
+  const maxX = Math.ceil(Math.max(point1.x, point2.x) + sizeOffset + 1);
+  const maxY = Math.ceil(Math.max(point1.y, point2.y) + sizeOffset + 1);
   const minXLimit = _.clamp(minX, 0, width);
   const maxXLimit = _.clamp(maxX, 0, width);
   const minYLimit = _.clamp(minY, 0, width);
@@ -167,6 +167,27 @@ export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBou
     width: bounds.width,
     height: bounds.height
   };
+}
+
+export function drawTarget(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
+  const position = params.position;
+  const lastPosition = lastParams.position;
+  const distance = distanceBetween(lastPosition, position);
+  const angle = angleBetween(lastPosition, position);
+
+  initCanvas(bufferCanvas, imageData.width, imageData.height, 
+             new ImageData(imageData.width, imageData.height));
+  const color = params.color;
+  const r = color.r;
+  const g = color.g;
+  const b = color.b;
+  const a = 1;
+  const startColor = `rgba(${r},${g},${b},${a})`;  
+  bufferContext.fillStyle = startColor;
+  bufferContext.fillRect(params.position.x - params.size / 2, params.position.y - params.size / 2, 
+                         params.size, params.size);
+
+  return getAllImageData(bufferContext);
 }
 
 export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
