@@ -14,12 +14,8 @@ import { fetchAlbumFromImgur } from './actions/images';
 import albums from './utils/defaultAlbums';
 import App from './ConnectedApp';
 import CanvasExample from './components/Drawing/CanvasApp';
-import * as Pressure from 'pressure';
-import { setImageData } from './actions/canvas';
-import { changePressure } from './actions/tools';
 import * as ReduxThunk from 'redux-thunk';
 import { Switch, Route } from 'react-router-dom';
-import * as _ from 'lodash';
 
 const history = createHistory();
 
@@ -41,20 +37,4 @@ ReactDOM.render(
   document.getElementById('root') as HTMLElement
 );
 
-const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-if (canvas) {
-  const context = canvas.getContext('2d');
-  if (context) {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
-    store.dispatch(setImageData(new ImageData(canvas.width, canvas.height)));
-  }
-}
-
-const throttledSetChange = _.throttle((force, event) => store.dispatch(changePressure(force, event)), 5);
-
 albums.forEach(album => store.dispatch(fetchAlbumFromImgur(album) as any)); //tslint:disable-line
-Pressure.set('.pressure', {
-  change: throttledSetChange,
-  end: () => store.dispatch(changePressure(0, null))
-});

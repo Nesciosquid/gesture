@@ -1,13 +1,15 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 import { connect } from 'react-redux';
 import { TouchEvent, MouseEvent } from 'react';
-import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/canvas';
+import { startDrawing, stopDrawing, drawWithCurrentTool, setImageData } from '../../actions/canvas';
 import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
 import { getImageData, getTransformMatrix, getDirtyBounds } from '../../selectors/canvas';
 import { initCanvas, DrawBounds, getPartialImageData } from '../../utils/canvas';
 import { TransformMatrix, Transform } from '../../utils/transform';
-// import { getImage } from '../../utils/canvas';
+import * as Pressure from 'pressure';
+import { changePressure } from '../../actions/tools';
 
 interface DrawingCanvasProps {
   startDrawing: (position: DrawPosition) => void;
@@ -16,6 +18,8 @@ interface DrawingCanvasProps {
   imageData: ImageData;
   transformMatrix: TransformMatrix;
   dirtyBounds: DrawBounds | undefined;
+  setImageData: (imageData: ImageData) => void;
+  changePressure: (force: number, event: Event | null) => void;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
@@ -25,7 +29,21 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
     super(props);
     this.bufferCanvas = document.createElement('canvas');
   }
+  initCanvas() {
+    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
+    if (canvas) {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      this.props.setImageData(new ImageData(canvas.width, canvas.height));
+    }
+    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 5);
+    Pressure.set('.pressure', {
+      change: throttledSetChange,
+      end: () => this.props.changePressure(0, null)
+    });    
+  }
   componentDidMount() {
+    this.initCanvas();
     const { imageData, transformMatrix, dirtyBounds } = this.props;
     this.redrawCanvas(imageData, transformMatrix, dirtyBounds);
   }
@@ -130,6 +148,12 @@ const mapDispatchToProps = (dispatch: Function) => ({
   startDrawing: (position: DrawPosition) => {
     dispatch(startDrawing(position));
   },
+  setImageData: (imageData: ImageData) => {
+    dispatch(setImageData(imageData));
+  },
+  changePressure: (force: number, event: Event | null) => {
+    dispatch(changePressure(force, event));
+  }
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DrawingCanvas);
