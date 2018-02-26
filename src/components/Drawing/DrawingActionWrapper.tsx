@@ -51,9 +51,7 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
         onTouchEnd={(event: TouchEvent<HTMLDivElement>) => {
           event.preventDefault();
           event.stopPropagation();
-          if (event.touches.length === 1) {            
-            this.props.stopDrawing();
-          }
+          this.props.stopDrawing();
         }}
         onTouchMove={(event: TouchEvent<HTMLDivElement>) => {
           event.preventDefault();

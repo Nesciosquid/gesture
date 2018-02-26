@@ -92,8 +92,8 @@ export function getBounds(point1: DrawPosition, point2: DrawPosition,
   const maxY = Math.ceil(Math.max(point1.y, point2.y) + sizeOffset + 1);
   const minXLimit = _.clamp(minX, 0, width);
   const maxXLimit = _.clamp(maxX, 0, width);
-  const minYLimit = _.clamp(minY, 0, width);
-  const maxYLimit = _.clamp(maxY, 0, width);
+  const minYLimit = _.clamp(minY, 0, height);
+  const maxYLimit = _.clamp(maxY, 0, height);
   return {
     minX: minXLimit,
     maxX: maxXLimit,
