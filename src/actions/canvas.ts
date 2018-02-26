@@ -3,6 +3,7 @@ import { DrawParams, DrawPosition } from '../types/canvas';
 import { getSelectedTool, getCurrentOpacity, getCurrentSize, getColor } from '../selectors/tools';
 import { TransformMatrix } from '../utils/transform';
 import { isDrawing } from '../selectors/canvas';
+import { GestureParams } from '../reducers/canvas';
 
 export const actionTypes = {
   setImageData: 'CANVAS//SET_IMAGE_DATA',
@@ -11,20 +12,20 @@ export const actionTypes = {
   draw: 'CANVAS//DRAW',
   clear: 'CANVAS//CLEAR',
   setTransform: 'CANVAS//SET_TRANSFORM',
-  storeTransform: 'CANVAS//STORE_TRANSFORM',
-  clearStoredTransform: 'CANVAS//CLEAR_STORED_TRANSFORM'
+  storeGestureParams: 'CANVAS//STORE_GESTURE_PARAMS',
+  clearStoredGestureParams: 'CANVAS//CLEAR_STORED_GESTURE_PARAMS'
 };
 
-export function clearStoredTransform() {
+export function clearStoredGestureParams() {
   return ({
-    type: actionTypes.clearStoredTransform,
+    type: actionTypes.clearStoredGestureParams
   });
 }
 
-export function storeTransform(matrix: TransformMatrix) {
+export function storeGestureParams(params: GestureParams) {
   return ({
-    type: actionTypes.storeTransform,
-    payload: matrix
+    type: actionTypes.storeGestureParams,
+    payload: params
   });
 }
 

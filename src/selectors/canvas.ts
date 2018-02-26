@@ -16,6 +16,6 @@ export function getDirtyBounds(state: ReduxState) {
   return state.canvas.dirtyBounds;
 }
 
-export function getStoredTransform(state: ReduxState) {
-  return state.canvas.storedTransform;
+export function getStoredGestureParams(state: ReduxState) {
+  return state.canvas.storedGestureParams;
 }

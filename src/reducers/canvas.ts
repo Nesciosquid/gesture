@@ -6,6 +6,15 @@ import { drawLines, drawGradients, drawFromPattern, getBounds,
    getPartialImageData, putPartialImageData, DrawBounds, drawTarget } from '../utils/canvas';
 import { TransformMatrix, Transform } from '../utils/transform';
 
+export interface GestureParams {
+  rotation: number;
+  center: { x: number, y: number };
+  angle: number;
+  deltaX: number;
+  deltaY: number;
+  scale: number;
+}
+
 export interface CanvasState {
   imageData?: ImageData;
   dirtyBounds?: DrawBounds;
@@ -13,7 +22,7 @@ export interface CanvasState {
   drawing: boolean;
   points: DrawPosition[];
   transformMatrix: TransformMatrix;
-  storedTransform?: TransformMatrix;
+  storedGestureParams?: GestureParams;
 }
 
 export const DefaultCanvasState: CanvasState = {
@@ -22,12 +31,12 @@ export const DefaultCanvasState: CanvasState = {
   transformMatrix: new Transform().matrix
 };
 
-function clearStoredTransform(state: CanvasState): CanvasState {
-  return { ...state, storedTransform: undefined };
+function clearStoredGestureParams(state: CanvasState): CanvasState {
+  return { ...state, storedGestureParams: undefined };
 }
 
-function storeTransform(state: CanvasState, matrix: TransformMatrix): CanvasState {
-  return { ...state, storedTransform: matrix };
+function storeGestureParams(state: CanvasState, params: GestureParams): CanvasState {
+  return { ...state, storedGestureParams: params };
 }
 
 function setTransform(state: CanvasState, matrix: TransformMatrix): CanvasState {
@@ -60,8 +69,6 @@ function draw(state: CanvasState, params: DrawParams): CanvasState {
   if (bounds.width === 0 || bounds.height === 0) {
     return { ...state, lastParams: params, imageData: imageData };
   }
-  console.log('params', params);
-  console.log(bounds);
   const partialImageData = new ImageData(getPartialImageData(imageData, bounds).data, bounds.width, bounds.height);
   const lastPosition = lastParams.position;
   const nextPosition = params.position;
@@ -143,11 +150,11 @@ export default function(state: CanvasState = DefaultCanvasState, {type, payload}
       case(actionTypes.clear): {
         return clear(state);
       }
-      case(actionTypes.storeTransform): {
-        return storeTransform(state, payload);
+      case(actionTypes.storeGestureParams): {
+        return storeGestureParams(state, payload);
       }
-      case(actionTypes.clearStoredTransform): {
-        return clearStoredTransform(state);
+      case(actionTypes.clearStoredGestureParams): {
+        return clearStoredGestureParams(state);
       }
       default:
         return state;
