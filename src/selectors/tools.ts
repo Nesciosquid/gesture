@@ -29,6 +29,10 @@ export function getToolById(state: ReduxState, toolId: string): Tool {
   return targetTool;
 }
 
+export function getCurrentLayer(state: ReduxState): number {
+  return state.tools.currentLayer;
+}
+
 export function getSelectedTool(state: ReduxState): Tool | undefined {
   return state.tools.tools.selected;
 }

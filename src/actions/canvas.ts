@@ -2,109 +2,37 @@ import { ReduxState } from '../reducers/index';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { getSelectedTool, getCurrentOpacity, getCurrentSize, getColor } from '../selectors/tools';
 import { TransformMatrix } from '../utils/transform';
-import { isDrawing } from '../selectors/canvas';
-import { GestureParams } from '../reducers/canvas';
 
 export const actionTypes = {
   setImageData: 'CANVAS//SET_IMAGE_DATA',
-  startDrawing: 'CANVAS//START_DRAWING',
-  stopDrawing: 'CANVAS//STOP_DRAWING',
   draw: 'CANVAS//DRAW',
   clear: 'CANVAS//CLEAR',
-  setTransform: 'CANVAS//SET_TRANSFORM',
-  storeGestureParams: 'CANVAS//STORE_GESTURE_PARAMS',
-  clearStoredGestureParams: 'CANVAS//CLEAR_STORED_GESTURE_PARAMS'
 };
 
-export function clearStoredGestureParams() {
-  return ({
-    type: actionTypes.clearStoredGestureParams
-  });
-}
-
-export function storeGestureParams(params: GestureParams) {
-  return ({
-    type: actionTypes.storeGestureParams,
-    payload: params
-  });
-}
-
-export function setTransformMatrix(matrix: TransformMatrix) {
-  return ({
-    type: actionTypes.setTransform,
-    payload: matrix
-  });
-}
-
-export function setImageData(imageData: ImageData) {
+export function setImageData(imageData: ImageData, layer: number) {
   return ({
       type: actionTypes.setImageData,
-      payload: imageData
+      payload: {
+        imageData,
+        layer
+      }
   });
 }
 
-export function draw(params: DrawParams) {
+export function draw(params: DrawParams, lastParams: DrawParams, layer: number) {
   return ({
     type: actionTypes.draw,
-    payload: params
-  });
-}
-
-export function __startDrawing(params: DrawParams) {
-  return ({
-    type: actionTypes.startDrawing,
-    payload: params
-  });
-}
-
-export function startDrawing(position: DrawPosition) {
-  return (dispatch: Function, getState: () => ReduxState) => {
-    const state = getState();
-    const tool = getSelectedTool(state);
-    const notDrawing = !isDrawing(state);
-    if (tool && notDrawing) {
-      const opacity = getCurrentOpacity(state, tool);
-      const size = getCurrentSize(state, tool);
-      const color = getColor(state);
-      dispatch(__startDrawing({
-        position,
-        tool,
-        size,
-        opacity,
-        color
-      }));
+    payload: {
+      params,
+      lastParams,
+      layer
     }
-  };
-}
-
-export function stopDrawing() {
-  return ({
-    type: actionTypes.stopDrawing
   });
 }
 
-export function clear() {
+export function clear(layer: number) {
   return ({
-    type: actionTypes.clear
+    type: actionTypes.clear,
+    payload: layer
   });
-}
-
-export function drawWithCurrentTool(position: DrawPosition) {
-  return (dispatch: Function, getState: () => ReduxState) => {
-    const state = getState();
-    const tool = getSelectedTool(state);
-    const drawing = isDrawing(state);
-    if (tool && drawing) {
-      const opacity = getCurrentOpacity(state, tool);
-      const size = getCurrentSize(state, tool);
-      const color = getColor(state);
-      dispatch(draw({
-        position,
-        tool,
-        size,
-        opacity,
-        color
-      }));
-    }
-  };
 }

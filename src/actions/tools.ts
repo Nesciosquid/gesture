@@ -12,7 +12,15 @@ export const actionTypes = {
     setToolOpacity: 'TOOLS//SET_TOOL_OPACITY',
     setColor: 'TOOLS//SET_COLOR',
     logHammerAction: 'TOOLS//LOG_HAMMER_ACTION',
+    setLayer: 'TOOLS//SET_LAYER'
 };
+
+export function setCurrentLayer(layer: number) {
+  return ({
+    type: actionTypes.setLayer,
+    payload: layer
+  });
+}
 
 export function __setColor(color: RGBColor) {
   return ({

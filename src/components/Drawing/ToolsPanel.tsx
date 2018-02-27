@@ -8,8 +8,8 @@ import { ToolOptions } from '../../types/tools';
 import { Button } from 'reactstrap';
 import ToolButton from './ToolButton';
 import SaveButton from './SaveButton';
-import { setTransformMatrix } from '../../actions/canvas';
-import { getTransformMatrix } from '../../selectors/canvas';
+import { setTransformMatrix } from '../../actions/viewport';
+import { getTransformMatrix } from '../../selectors/viewport';
 import { getToolOptions, getColor } from '../../selectors/tools';
 import { TransformMatrix, Transform } from '../../utils/transform';
 import HammerActionViewer from './HammerActionViewer';
@@ -17,7 +17,7 @@ import HammerActionViewer from './HammerActionViewer';
 interface ToolsPanelProps {
   color: RGBColor;
   setColor: (color: RGBColor) => void;
-  clear: () => void;
+  clear: (layer: number) => void;
   toolOptions: ToolOptions;
   transformMatrix: TransformMatrix;
   setTransformMatrix: (matrix: TransformMatrix) => void;
@@ -46,29 +46,9 @@ function ToolsPanel(props: ToolsPanelProps) {
         })
       }
       <div style={{height: '50px' }} />
-      <Button 
-        onClick={() => translateX(10)}
-      >
-        Translate right
-      </Button>
-      <Button 
-        onClick={() => translateX(-10)}
-      >
-        Translate left
-      </Button>
-      <Button 
-        onClick={() => rotate(Math.PI / 10)}
-      >
-        Rotate right
-      </Button>
-      <Button 
-        onClick={() => rotate(-Math.PI / 10)}
-      >
-        Rotate left
-      </Button>
-      <Button onClick={() => props.clear()}>Clear</Button>
+      <Button onClick={() => props.clear(0)}>Clear</Button>
       <div style={{height: '50px' }} />
-      <HammerActionViewer />
+      {/* <HammerActionViewer /> */}
       <SaveButton />
     </div>
   );
@@ -85,7 +65,7 @@ function mapStateToProps(state: ReduxState) {
 function mapDispatchToProps(dispatch: Function) {
   return ({
     setColor: (color: RGBColor) => dispatch(setColor(color)),
-    clear: () => dispatch(clear()),
+    clear: (layer: number) => dispatch(clear(layer)),
     setTransformMatrix: (matrix: TransformMatrix) => dispatch(setTransformMatrix(matrix))
   });
 }

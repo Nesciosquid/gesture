@@ -1,21 +1,9 @@
 import { ReduxState } from '../reducers/index';
+import { createSelector } from 'reselect';
+import { combineLayers } from '../utils/canvas';
 
-export function getImageData(state: ReduxState) {
-  return state.canvas.imageData;
-}
+export const getCanvas = (state: ReduxState) => state.canvas;
 
-export function getTransformMatrix(state: ReduxState) {
-  return state.canvas.transformMatrix;
-}
-
-export function isDrawing(state: ReduxState) {
-  return state.canvas.drawing;
-}
-
-export function getDirtyBounds(state: ReduxState) {
-  return state.canvas.dirtyBounds;
-}
-
-export function getStoredGestureParams(state: ReduxState) {
-  return state.canvas.storedGestureParams;
-}
+export const getImageData = createSelector(getCanvas, (canvas) => {
+  return combineLayers(canvas.layers);
+});

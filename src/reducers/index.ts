@@ -4,6 +4,7 @@ import settings, { SettingsState } from './settings';
 import tools, { ToolsState } from './tools';
 import { routerReducer, RouterState } from 'react-router-redux';
 import canvas, { CanvasState } from './canvas';
+import viewport, { ViewportState } from './viewport';
 
 export interface ReduxState {
     images: ImagesState;
@@ -11,6 +12,7 @@ export interface ReduxState {
     router: RouterState;
     tools: ToolsState;
     canvas: CanvasState;
+    viewport: ViewportState;
 }
 
 export default combineReducers<ReduxState>({
@@ -18,5 +20,6 @@ export default combineReducers<ReduxState>({
     settings,
     tools,   
     canvas,
+    viewport,
     router: routerReducer,
 });

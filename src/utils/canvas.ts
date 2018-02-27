@@ -4,13 +4,14 @@ import Tool from '../types/tools/Tool';
 import lerp from 'lerp';
 import * as FileSaver from 'file-saver';
 import * as _ from 'lodash';
+import { DrawLayer } from '../reducers/canvas';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
 const patternCanvas: HTMLCanvasElement = document.createElement('canvas');
 const patternContext = patternCanvas.getContext('2d') as CanvasRenderingContext2D;
-const partialCanvas: HTMLCanvasElement = document.createElement('canvas');
-const partialContext = partialCanvas.getContext('2d') as CanvasRenderingContext2D;
+const combineCanvas: HTMLCanvasElement = document.createElement('canvas');
+const combineContext = combineCanvas.getContext('2d') as CanvasRenderingContext2D;
 
 export interface ImageDataWrapper {
   data: Uint8ClampedArray;
@@ -132,6 +133,41 @@ export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawP
   }
 }
 
+export function getColorData(color: RGBColor, width: number, height: number) {
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < data.length; i += 4) {
+    const r = color.r;
+    const g = color.g;
+    const b = color.b;
+    const a = 255;
+    data[i] = r;
+    data[i + 1] = g;
+    data[i + 2] = b;
+    data[i + 3] = a; 
+  }
+  return new ImageData(data, width, height);
+}
+
+export function combineLayers(layers: DrawLayer[]) {
+  const background = layers[0];
+  const width = background.imageData.width;
+  const height = background.imageData.height;
+  initCanvas(combineCanvas, width, height, background.imageData);
+  initCanvas(bufferCanvas, width, height);
+  layers.forEach((layer, index) => {
+    if (index !== 0) {
+      if (layer.imageData.width !== width || layer.imageData.height !== height) {
+        throw new Error(`Layer imagedata has wrong width or height. 
+          Background has width ${width} and height ${height}. 
+          Layer has width ${layer.imageData.width} and height ${layer.imageData.height})`);
+      }
+      bufferContext.putImageData(layer.imageData, 0, 0);
+      combineContext.drawImage(bufferCanvas, 0, 0);
+    }
+  });
+  return getAllImageData(combineContext);
+}
+
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
                                     bounds: DrawBounds): ImageDataWrapper {
   const newData = targetImageData.data.slice();
@@ -170,27 +206,6 @@ export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBou
     width: bounds.width,
     height: bounds.height
   };
-}
-
-export function drawTarget(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
-  const position = params.position;
-  const lastPosition = lastParams.position;
-  const distance = distanceBetween(lastPosition, position);
-  const angle = angleBetween(lastPosition, position);
-
-  initCanvas(bufferCanvas, imageData.width, imageData.height, 
-             new ImageData(imageData.width, imageData.height));
-  const color = params.color;
-  const r = color.r;
-  const g = color.g;
-  const b = color.b;
-  const a = 1;
-  const startColor = `rgba(${r},${g},${b},${a})`;  
-  bufferContext.fillStyle = startColor;
-  bufferContext.fillRect(params.position.x - params.size / 2, params.position.y - params.size / 2, 
-                         params.size, params.size);
-
-  return getAllImageData(bufferContext);
 }
 
 export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {

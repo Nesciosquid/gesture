@@ -2,18 +2,18 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { ReactChild } from 'react';
 import { setTransformMatrix, drawWithCurrentTool,
-  startDrawing, stopDrawing, storeGestureParams, clearStoredGestureParams } from '../../actions/canvas';
+  startDrawing, stopDrawing, storeGestureParams, clearStoredGestureParams } from '../../actions/viewport';
 // import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
 import { TransformMatrix, Transform } from '../../utils/transform';
-import { getTransformMatrix, getStoredGestureParams } from '../../selectors/canvas';
+import { getTransformMatrix, getStoredGestureParams } from '../../selectors/viewport';
 import * as Hammer from 'hammerjs';
 import { logHammerAction } from '../../actions/tools';
 import { DrawPosition } from '../../types/canvas/index';
 import { getSelectedTool } from '../../selectors/tools';
 import Tool from '../../types/tools/Tool';
 import { ToolType } from '../../types/tools/index';
-import { GestureParams } from '../../reducers/canvas';
+import { GestureParams } from '../../reducers/viewport';
 
 interface TransformActionWrapperProps {
   logHammerAction: (type: string, event: HammerInput) => void;

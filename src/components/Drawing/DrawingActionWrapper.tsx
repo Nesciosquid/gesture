@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { TouchEvent, MouseEvent, ReactChild } from 'react';
-import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/canvas';
+import { startDrawing, stopDrawing, drawWithCurrentTool } from '../../actions/viewport';
 import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
 import { TransformMatrix, Transform } from '../../utils/transform';
 import * as Pressure from 'pressure';
-import { getTransformMatrix } from '../../selectors/canvas';
+import { getTransformMatrix } from '../../selectors/viewport';
 import { changePressure } from '../../actions/tools';
 import * as _ from 'lodash';
 

@@ -19,6 +19,7 @@ export interface ToolsState {
     event?: HammerInput,
     actionType: string
   };
+  currentLayer: number;
 }
 
 export const DefaultToolsState: ToolsState = {
@@ -36,13 +37,18 @@ export const DefaultToolsState: ToolsState = {
   },
   lastHammerAction: {
     actionType: 'setup',
-  }
+  },
+  currentLayer: 1
 };
 
 function logHammerAction(state: ToolsState, lastHammerAction: { actionType: string, event: HammerInput}): ToolsState {
   return {
     ...state, lastHammerAction
   };
+}
+
+function setCurrentLayer(state: ToolsState, layer: number): ToolsState {
+  return { ...state, currentLayer: layer };
 }
 
 function setColor(state: ToolsState, color: RGBColor): ToolsState {
@@ -68,6 +74,9 @@ export default function(state: ToolsState = DefaultToolsState, {type, payload}: 
       }
       case (actionTypes.setColor): {
         return setColor(state, payload);
+      }
+      case (actionTypes.setLayer): {
+        return setCurrentLayer(state, payload);
       }
       case (actionTypes.logHammerAction): {
         return logHammerAction(state, payload);
