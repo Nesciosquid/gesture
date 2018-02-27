@@ -46,7 +46,7 @@ function ToolsPanel(props: ToolsPanelProps) {
         })
       }
       <div style={{height: '50px' }} />
-      <Button onClick={() => props.clear(0)}>Clear</Button>
+      <Button onClick={() => props.clear(1)}>Clear</Button>
       <div style={{height: '50px' }} />
       {/* <HammerActionViewer /> */}
       <SaveButton />
