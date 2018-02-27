@@ -102,10 +102,6 @@ function draw(state: CanvasState, params: DrawParams): CanvasState {
     }
   }
 
-  console.log('bounds', bounds);
-  console.log('imageData', imageData);
-  console.log('modifiedPartialData', modifiedPartialData);
-
   const newData = putPartialImageData(imageData, modifiedPartialData, bounds);
   const newImageData = new ImageData(newData.data, newData.width, newData.height);
   return { ...state, lastParams: params, imageData: newImageData, dirtyBounds: bounds};

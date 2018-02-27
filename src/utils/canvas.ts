@@ -9,6 +9,8 @@ const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
 const patternCanvas: HTMLCanvasElement = document.createElement('canvas');
 const patternContext = patternCanvas.getContext('2d') as CanvasRenderingContext2D;
+const partialCanvas: HTMLCanvasElement = document.createElement('canvas');
+const partialContext = partialCanvas.getContext('2d') as CanvasRenderingContext2D;
 
 export interface ImageDataWrapper {
   data: Uint8ClampedArray;
@@ -132,7 +134,8 @@ export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawP
 
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
                                     bounds: DrawBounds): ImageDataWrapper {
-  const newData = targetImageData.data.slice();
+  // const newData = targetImageData.data.slice();
+  const newData = targetImageData.data;
   for (let i = bounds.minY; i < bounds.maxY; i++) {
     const yOffset = i * targetImageData.width * 4;
     const xStartOffset = bounds.minX * 4;
@@ -196,8 +199,7 @@ export function drawGradients(imageData: ImageData, params: DrawParams, lastPara
   const distance = distanceBetween(lastPosition, position);
   const angle = angleBetween(lastPosition, position);
 
-  initCanvas(bufferCanvas, imageData.width, imageData.height, 
-             new ImageData(imageData.data, imageData.width, imageData.height));
+  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
 
   for (let i = 0; i < distance; i += 1) {
     const x = lastPosition.x + (Math.sin(angle) * i);

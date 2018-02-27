@@ -45,17 +45,10 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
       const context = this.canvas.getContext('2d');
       if (context) {
         if (dirtyBounds) {
-          context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);    
-          context.globalCompositeOperation = 'destination-in';          
-          context.fillStyle = 'red';
-          context.fillRect(0, 0, imageData.width, imageData.height);
-          context.globalCompositeOperation = 'source-over';
-          context.clearRect(dirtyBounds.minX, dirtyBounds.minY, dirtyBounds.width, dirtyBounds.height);       
-          const dirtyImageData = new ImageData(getPartialImageData(imageData, dirtyBounds).data, 
-                                               dirtyBounds.width, dirtyBounds.height);
-
-          initCanvas(this.bufferCanvas, dirtyBounds.width, dirtyBounds.height, dirtyImageData);
-          context.drawImage(this.bufferCanvas, dirtyBounds.minX, dirtyBounds.minY);
+          context.clearRect(0, 0, this.canvas.width, this.canvas.height);          
+          context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);
+          initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);
+          context.drawImage(this.bufferCanvas, 0, 0);
         }
       }
     }

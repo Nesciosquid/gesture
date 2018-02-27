@@ -25,6 +25,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 const store = createStore(reducer, applyMiddleware(...middleware));
 
+// testPerformance();
+
 ReactDOM.render(
   <Provider store={store}>
     <BrowserRouter>
