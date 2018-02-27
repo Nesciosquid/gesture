@@ -148,6 +148,23 @@ export function getColorData(color: RGBColor, width: number, height: number) {
   return new ImageData(data, width, height);
 }
 
+export function updateFromLayers(imageData: ImageData, layers: DrawLayer[], bounds: DrawBounds): ImageData {
+  const partialBackground = getPartialImageData(layers[0].imageData, bounds);
+  const initialData = new ImageData(partialBackground.data, bounds.width, bounds.height);
+  initCanvas(combineCanvas, bounds.width, bounds.height, initialData);
+  initCanvas(bufferCanvas, bounds.width, bounds.height);
+  layers.forEach((layer, index) => {
+    if (index !== 0) {
+      const partialData = new ImageData(getPartialImageData(layer.imageData, bounds).data, bounds.width, bounds.height);
+      bufferContext.putImageData(partialData, 0, 0);
+      combineContext.globalCompositeOperation = 'source-over';
+      combineContext.drawImage(bufferCanvas, 0, 0);
+    }
+  });
+  const newData = putPartialImageData(imageData, getAllImageData(combineContext), bounds);
+  return new ImageData(newData.data, imageData.width, imageData.height);
+}
+
 export function combineLayers(layers: DrawLayer[]) {
   const background = layers[0];
   const width = background.imageData.width;

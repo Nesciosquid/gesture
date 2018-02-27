@@ -5,5 +5,5 @@ import { combineLayers } from '../utils/canvas';
 export const getCanvas = (state: ReduxState) => state.canvas;
 
 export const getImageData = createSelector(getCanvas, (canvas) => {
-  return combineLayers(canvas.layers);
+  return canvas.flatImageData;
 });

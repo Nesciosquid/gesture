@@ -3,7 +3,7 @@ import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { drawLines, drawGradients, drawFromPattern, getBounds,
-   getPartialImageData, putPartialImageData, DrawBounds, getColorData } from '../utils/canvas';
+   getPartialImageData, putPartialImageData, DrawBounds, getColorData, updateFromLayers, combineLayers } from '../utils/canvas';
 import { RGBColor } from 'react-color';
 
 export interface DrawLayer {
@@ -14,17 +14,22 @@ export interface DrawLayer {
 export interface CanvasState {
   layers: DrawLayer[];
   lastParams?: DrawParams;
+  dirtyBounds?: DrawBounds;
+  flatImageData: ImageData;
 }
 
+const backgroundData = getColorData({ r: 211, g: 211, b: 211 }, 1920, 1080);
+const initialLayers = [{
+  name: 'background',
+  imageData: backgroundData
+},
+{
+  name: 'first_layer',
+  imageData: new ImageData(1920, 1080)
+}];
 export const DefaultCanvasState: CanvasState = {
-  layers: [{
-    name: 'background',
-    imageData: getColorData({ r: 211, g: 211, b: 211 }, 1920, 1080)
-  },
-  {
-    name: 'first_layer',
-    imageData: new ImageData(1920, 1080)
-  }]
+  layers: initialLayers,
+  flatImageData: combineLayers(initialLayers)
 };
 
 function setImageData(state: CanvasState, imageData: ImageData, layer: number): CanvasState {
@@ -75,7 +80,9 @@ function draw(state: CanvasState, params: DrawParams, lastParams: DrawParams, la
   const newImageData = new ImageData(newData.data, newData.width, newData.height);
   const layers = state.layers.slice();
   layers[layer].imageData = newImageData;
-  return { ...state, lastParams: params, layers};
+  const flatData = updateFromLayers(state.flatImageData, layers, bounds);
+  // const flatData = combineLayers(layers); 
+  return { ...state, lastParams: params, layers, dirtyBounds: bounds, flatImageData: flatData };
 }
 
 function clear(state: CanvasState, layer: number): CanvasState {
@@ -85,7 +92,7 @@ function clear(state: CanvasState, layer: number): CanvasState {
   const layers = state.layers.slice();
   const imageData = layers[layer].imageData;
   layers[layer].imageData = new ImageData(imageData.width, imageData.height);
-  return { ...state, layers };
+  return { ...state, layers, flatImageData: combineLayers(layers) };
 }
 
 export default function(state: CanvasState = DefaultCanvasState, {type, payload}: ReduxAction): CanvasState {
