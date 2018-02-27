@@ -134,8 +134,8 @@ export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawP
 
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
                                     bounds: DrawBounds): ImageDataWrapper {
-  // const newData = targetImageData.data.slice();
-  const newData = targetImageData.data;
+  const newData = targetImageData.data.slice();
+  // const newData = targetImageData.data;
   for (let i = bounds.minY; i < bounds.maxY; i++) {
     const yOffset = i * targetImageData.width * 4;
     const xStartOffset = bounds.minX * 4;
