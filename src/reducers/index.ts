@@ -5,6 +5,7 @@ import tools, { ToolsState } from './tools';
 import { routerReducer, RouterState } from 'react-router-redux';
 import canvas, { CanvasState } from './canvas';
 import viewport, { ViewportState } from './viewport';
+import performance, { PerformanceState } from './performance';
 
 export interface ReduxState {
     images: ImagesState;
@@ -13,6 +14,7 @@ export interface ReduxState {
     tools: ToolsState;
     canvas: CanvasState;
     viewport: ViewportState;
+    performance: PerformanceState;
 }
 
 export default combineReducers<ReduxState>({
@@ -21,5 +23,6 @@ export default combineReducers<ReduxState>({
     tools,   
     canvas,
     viewport,
+    performance,
     router: routerReducer,
 });

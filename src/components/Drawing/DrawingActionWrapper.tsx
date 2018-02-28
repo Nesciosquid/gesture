@@ -25,7 +25,7 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
     this.initPressure();
   }
   initPressure = () => {
-    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 5);
+    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 50);
     Pressure.set(this.drawWrapper, {
       change: throttledSetChange,
       end: () => this.props.changePressure(0, null)

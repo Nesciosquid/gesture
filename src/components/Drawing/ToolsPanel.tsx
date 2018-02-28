@@ -12,6 +12,7 @@ import { setTransformMatrix } from '../../actions/viewport';
 import { getTransformMatrix } from '../../selectors/viewport';
 import { getToolOptions, getColor } from '../../selectors/tools';
 import { TransformMatrix, Transform } from '../../utils/transform';
+import { getAverageLog, getSampleRate } from '../../selectors/performance';
 import HammerActionViewer from './HammerActionViewer';
 
 interface ToolsPanelProps {
@@ -21,6 +22,8 @@ interface ToolsPanelProps {
   toolOptions: ToolOptions;
   transformMatrix: TransformMatrix;
   setTransformMatrix: (matrix: TransformMatrix) => void;
+  averageLog: number;
+  sampleRate: number;
 }
 
 function ToolsPanel(props: ToolsPanelProps) {
@@ -35,10 +38,10 @@ function ToolsPanel(props: ToolsPanelProps) {
   };
   return (
     <div className="tools-panel">
-      <SketchPicker
+      {/* <SketchPicker
         color={props.color}
         onChangeComplete={(color) => props.setColor(color.rgb)}
-      />
+      /> */}
       {
         Object.keys(props.toolOptions).map((toolId: string) => {
           const tool = props.toolOptions[toolId];
@@ -50,6 +53,9 @@ function ToolsPanel(props: ToolsPanelProps) {
       <div style={{height: '50px' }} />
       {/* <HammerActionViewer /> */}
       <SaveButton />
+      Draw Time: {props.averageLog}
+      <div style={{height: '10px' }} />
+      Sample Rate: {props.sampleRate}
     </div>
   );
 }
@@ -58,7 +64,9 @@ function mapStateToProps(state: ReduxState) {
   return ({
     color: getColor(state),
     toolOptions: getToolOptions(state),
-    transformMatrix: getTransformMatrix(state)
+    transformMatrix: getTransformMatrix(state),
+    averageLog: getAverageLog(state),
+    sampleRate: getSampleRate(state)
   });
 }
 

@@ -5,6 +5,7 @@ import { TransformMatrix } from '../utils/transform';
 import { isDrawing, getStoredDrawParams } from '../selectors/viewport';
 import { GestureParams } from '../reducers/viewport';
 import { draw } from './canvas';
+import { startSampling, stopSampling, addSample } from './performance';
 
 export const actionTypes = {
   startDrawing: 'VIEWPORT//START_DRAWING',
@@ -73,6 +74,7 @@ export function startDrawing(position: DrawPosition) {
         color
       };
       dispatch(storeDrawParams(drawParams));
+      dispatch(startSampling());
       dispatch(__startDrawing(drawParams));
     }
   };
@@ -88,6 +90,7 @@ export function stopDrawing() {
   return (dispatch: Function, getState: () => ReduxState) => {
     dispatch(clearStoredDrawParams());
     dispatch(__stopDrawing());
+    dispatch(stopSampling());    
   };
 }
 
@@ -113,6 +116,7 @@ export function drawWithCurrentTool(position: DrawPosition) {
         throw new Error('No last params found.');
       }
       dispatch(storeDrawParams(drawParams));
+      dispatch(addSample());
       dispatch(draw(drawParams, lastParams, layer));
     }
   };

@@ -7,3 +7,7 @@ export const getCanvas = (state: ReduxState) => state.canvas;
 export const getImageData = createSelector(getCanvas, (canvas) => {
   return canvas.flatImageData;
 });
+
+export const getDirtyBounds = createSelector(getCanvas, (canvas) => {
+  return canvas.dirtyBounds;
+});

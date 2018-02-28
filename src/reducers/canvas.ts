@@ -2,9 +2,10 @@ import { ReduxAction } from '../actions/index';
 import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
-import { drawLines, drawGradients, drawFromPattern, getBounds,
-   getPartialImageData, putPartialImageData, DrawBounds, getColorData, updateFromLayers, combineLayers } from '../utils/canvas';
+import { drawLines, drawGradients, drawFromPattern, getBounds, getPartialImageData, 
+  putPartialImageData, DrawBounds, getColorData, updateFromLayers, combineLayers, getFullBounds } from '../utils/canvas';
 import { RGBColor } from 'react-color';
+import { defaultWidth, defaultHeight } from '../utils/constants';
 
 export interface DrawLayer {
   name?: string;
@@ -14,22 +15,23 @@ export interface DrawLayer {
 export interface CanvasState {
   layers: DrawLayer[];
   lastParams?: DrawParams;
-  dirtyBounds?: DrawBounds;
+  dirtyBounds: DrawBounds;
   flatImageData: ImageData;
 }
 
-const backgroundData = getColorData({ r: 211, g: 211, b: 211 }, 1920, 1080);
+const backgroundData = getColorData({ r: 211, g: 211, b: 211 }, defaultWidth, defaultHeight);
 const initialLayers = [{
   name: 'background',
   imageData: backgroundData
 },
 {
   name: 'first_layer',
-  imageData: new ImageData(1920, 1080)
+  imageData: new ImageData(defaultWidth, defaultHeight)
 }];
 export const DefaultCanvasState: CanvasState = {
   layers: initialLayers,
-  flatImageData: combineLayers(initialLayers)
+  flatImageData: combineLayers(initialLayers),
+  dirtyBounds: getFullBounds(backgroundData),
 };
 
 function setImageData(state: CanvasState, imageData: ImageData, layer: number): CanvasState {
@@ -92,7 +94,8 @@ function clear(state: CanvasState, layer: number): CanvasState {
   const layers = state.layers.slice();
   const imageData = layers[layer].imageData;
   layers[layer].imageData = new ImageData(imageData.width, imageData.height);
-  return { ...state, layers, flatImageData: combineLayers(layers) };
+  const flattenedImageData = combineLayers(layers);
+  return { ...state, layers, flatImageData: flattenedImageData, dirtyBounds: getFullBounds(flattenedImageData) };
 }
 
 export default function(state: CanvasState = DefaultCanvasState, {type, payload}: ReduxAction): CanvasState {

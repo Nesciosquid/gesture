@@ -151,17 +151,21 @@ export function getColorData(color: RGBColor, width: number, height: number) {
 export function updateFromLayers(imageData: ImageData, layers: DrawLayer[], bounds: DrawBounds): ImageData {
   const partialBackground = getPartialImageData(layers[0].imageData, bounds);
   const initialData = new ImageData(partialBackground.data, bounds.width, bounds.height);
+  combineContext.putImageData(initialData, 0, 0, 0, 0, bounds.width, bounds.height);
   initCanvas(combineCanvas, bounds.width, bounds.height, initialData);
   initCanvas(bufferCanvas, bounds.width, bounds.height);
+  const tempArray = new Uint8ClampedArray(bounds.width * bounds.height * 4);
   layers.forEach((layer, index) => {
     if (index !== 0) {
-      const partialData = new ImageData(getPartialImageData(layer.imageData, bounds).data, bounds.width, bounds.height);
-      bufferContext.putImageData(partialData, 0, 0);
+      const partialData = getPartialImageData(layer.imageData, bounds, tempArray).data;
+      const image = new ImageData(partialData, bounds.width, bounds.height);
+      bufferContext.putImageData(image, 0, 0, 0, 0, bounds.width, bounds.height);
       combineContext.globalCompositeOperation = 'source-over';
       combineContext.drawImage(bufferCanvas, 0, 0);
     }
   });
-  const newData = putPartialImageData(imageData, getAllImageData(combineContext), bounds);
+  const updatedPartialData = combineContext.getImageData(0, 0, bounds.width, bounds.height);
+  const newData = putPartialImageData(imageData, updatedPartialData, bounds);
   return new ImageData(newData.data, imageData.width, imageData.height);
 }
 
@@ -186,9 +190,13 @@ export function combineLayers(layers: DrawLayer[]) {
 }
 
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
-                                    bounds: DrawBounds): ImageDataWrapper {
-  const newData = targetImageData.data.slice();
-  // const newData = targetImageData.data;
+                                    bounds: DrawBounds, targetArray?: Uint8ClampedArray): ImageDataWrapper {
+  let newData: Uint8ClampedArray;
+  if (targetArray) {
+    newData = targetArray;
+  } else {
+    newData = targetImageData.data.slice();
+  }
   for (let i = bounds.minY; i < bounds.maxY; i++) {
     const yOffset = i * targetImageData.width * 4;
     const xStartOffset = bounds.minX * 4;
@@ -206,8 +214,25 @@ export function putPartialImageData(targetImageData: ImageDataWrapper, partialDa
   };
 }
 
-export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBounds): ImageDataWrapper {
-  const newData = new Uint8ClampedArray(bounds.height * bounds.width * 4);
+export function getFullBounds(imageData: ImageData) {
+  return {
+    minX: 0,
+    minY: 0,
+    maxX: imageData.width,
+    maxY: imageData.height,
+    width: imageData.width,
+    height: imageData.height
+  };
+}
+
+export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBounds,
+                                    targetArray?: Uint8ClampedArray): ImageDataWrapper {
+  let newData: Uint8ClampedArray;
+  if (targetArray) {
+    newData = targetArray;
+  } else {
+    newData = new Uint8ClampedArray(bounds.height * bounds.width * 4);
+  }
   for (let i = bounds.minY; i < bounds.maxY; i++) {
     const yOffset = i * imageData.width * 4;
     const xStartOffset = bounds.minX * 4;
