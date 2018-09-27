@@ -16,14 +16,12 @@ export interface GestureParams {
 
 export interface ViewportState {
   drawing: boolean;
-  transformMatrix: TransformMatrix;
   storedGestureParams?: GestureParams;
   storedDrawParams?: DrawParams;
 }
 
 export const DefaultViewportState: ViewportState = {
   drawing: false,
-  transformMatrix: new Transform().matrix,
 };
 
 function clearGestureParams(state: ViewportState): ViewportState {
@@ -42,10 +40,6 @@ function clearDrawParams(state: ViewportState): ViewportState {
   return { ...state, storedDrawParams: undefined };
 }
 
-function setTransform(state: ViewportState, matrix: TransformMatrix): ViewportState {
-  return { ...state, transformMatrix: matrix };
-}
-
 function startDrawing(state: ViewportState, params: DrawParams): ViewportState {
   return { ... state, drawing: true, storedDrawParams: params };
 }
@@ -61,9 +55,6 @@ export default function(state: ViewportState = DefaultViewportState, {type, payl
       }
       case(actionTypes.stopDrawing): {
         return stopDrawing(state);
-      }
-      case(actionTypes.setTransform): {
-        return setTransform(state, payload);
       }
       case(actionTypes.storeDrawParams): {
         return storeDrawParams(state, payload);

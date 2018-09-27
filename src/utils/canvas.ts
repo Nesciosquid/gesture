@@ -250,20 +250,18 @@ export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBou
   };
 }
 
-export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
+export function drawGradientsInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) { 
   const position = params.position;
   const lastPosition = lastParams.position;
   const distance = distanceBetween(lastPosition, position);
   const angle = angleBetween(lastPosition, position);
 
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
-
   for (let i = 0; i < distance; i += 1) {
     const x = lastPosition.x + (Math.sin(angle) * i);
     const y = lastPosition.y + (Math.cos(angle) * i);
     const ratio = i / distance;
-    setGlobalParams(bufferContext, params, lastParams, ratio);    
-    bufferContext.globalAlpha = 1;
+    setGlobalParams(context, params, lastParams, ratio);    
+    context.globalAlpha = 1;
     const size = lerp(lastParams.size, params.size, ratio);
     const opacity = lerp(lastParams.opacity, params.opacity, ratio);
     const color = params.color;
@@ -274,15 +272,19 @@ export function drawGradients(imageData: ImageData, params: DrawParams, lastPara
     const startColor = `rgba(${r},${g},${b},${a})`;  
     const midColor = `rgba(${r},${g},${b},${a * .5})`;  
     const endColor = `rgba(${r},${g},${b},0)`;  
-    var gradient = bufferContext.createRadialGradient(x, y, size / 4, x, y, size / 2);    
+    var gradient = context.createRadialGradient(x, y, size / 4, x, y, size / 2);    
     
     gradient.addColorStop(0, startColor);
     gradient.addColorStop(0.5, midColor);
     gradient.addColorStop(1, endColor);
-    bufferContext.fillStyle = gradient;
-    bufferContext.fillRect(x - params.size / 2, y - params.size / 2, size, size);
+    context.fillStyle = gradient;
+    context.fillRect(x - params.size / 2, y - params.size / 2, size, size);
   }
+}
 
+export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
+  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
+  drawGradientsInContext(bufferContext, params, lastParams);
   return getAllImageData(bufferContext);
 }
 
@@ -293,14 +295,18 @@ export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
   };
 }
 
-export function drawLines(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
+export function drawLinesInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) {
   const color = params.color;
-  const context = bufferContext;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
   drawLineSegments(context, 1, params, lastParams);
+}
+
+export function drawLines(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
+  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
+  const context = bufferContext;
+  drawLinesInContext(context, params, lastParams);
   return getAllImageData(context);
 }
 
@@ -315,7 +321,7 @@ export function drawLineSegments(context: CanvasRenderingContext2D, minDistance:
   context.moveTo(start.x, start.y);    
   for (let z = 0 ; z < distance; z += minDistance ) {
     const ratio = z / distance;
-    setGlobalParams(bufferContext, params, lastParams, ratio);    
+    setGlobalParams(context, params, lastParams, ratio);  
     const x = start.x + (Math.sin(angle) * z);
     const y = start.y + (Math.cos(angle) * z);
     context.beginPath();
@@ -362,6 +368,15 @@ export function drawFromPattern(imageData: ImageData,
   if (!params.tool.grainImage) {
     throw new Error('No grain image found for tool!');
   }
+  drawFromPatternInContext(context, params, lastParams);
+  return context.getImageData(0, 0, imageData.width, imageData.height);
+}
+
+export function drawFromPatternInContext(context: CanvasRenderingContext2D, params: DrawParams, 
+                                         lastParams: DrawParams) {
+  if (!params.tool.grainImage) {
+    throw new Error('No grain image found for tool!');
+  }
   const grainScale = params.tool.grainScale ? params.tool.grainScale : 1;
   const grainImage = params.tool.grainImage;
   const pattern = context.createPattern(getPatternCanvas(grainImage, grainScale, 10), 'repeat');
@@ -369,5 +384,4 @@ export function drawFromPattern(imageData: ImageData,
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
   drawLineSegments(context, params.size / 2, params, lastParams);
-  return bufferContext.getImageData(0, 0, imageData.width, imageData.height);
 }

@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import { setImageData } from '../../actions/canvas';
+import { setImageData, setBufferCanvas, setCanvas } from '../../actions/canvas';
 import { ReduxState } from '../../reducers/index';
 import { getImageData, getDirtyBounds } from '../../selectors/canvas';
-import { getTransformMatrix } from '../../selectors/viewport';
+import { getTransformMatrix } from '../../selectors/canvas';
 import { initCanvas, DrawBounds, getPartialImageData } from '../../utils/canvas';
 import { TransformMatrix } from '../../utils/transform';
 import DrawingActionWrapper from './DrawingActionWrapper';
@@ -14,6 +14,8 @@ interface DrawingCanvasProps {
   imageData: ImageData;
   transformMatrix: TransformMatrix;
   stopLog: () => void;
+  setCanvas: (canvas: HTMLCanvasElement) => void;
+  setBufferCanvas: (Canvas: HTMLCanvasElement) => void;
   dirtyBounds: DrawBounds;
 }
 
@@ -34,12 +36,16 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
   }
   componentDidMount() {
     this.initCanvas();
+    this.props.setBufferCanvas(this.bufferCanvas);
+    if (this.canvas) {
+      this.props.setCanvas(this.canvas);      
+    }
     const { imageData, transformMatrix } = this.props;
     this.redrawCanvas(imageData, transformMatrix);
   }
   componentWillReceiveProps(nextProps: DrawingCanvasProps) {
-    const { imageData, transformMatrix } = nextProps;
-    this.redrawCanvas(imageData, transformMatrix);
+    // const { imageData, transformMatrix } = nextProps;
+    // this.redrawCanvas(imageData, transformMatrix);
   }
   redrawCanvas = async (imageData: ImageData, matrix: TransformMatrix) => {
     if (this.canvas && imageData) {
@@ -80,7 +86,9 @@ const mapStateToProps = (state: ReduxState) => ({
 });
 
 const mapDispatchToProps = (dispatch: Function) => ({
-  stopLog: () => dispatch(stopLog())
+  stopLog: () => dispatch(stopLog()),
+  setCanvas: (canvas: HTMLCanvasElement) => dispatch(setCanvas(canvas)),
+  setBufferCanvas: (canvas: HTMLCanvasElement) => dispatch(setBufferCanvas(canvas))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(DrawingCanvas);

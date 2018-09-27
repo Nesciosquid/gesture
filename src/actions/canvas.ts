@@ -8,7 +8,31 @@ export const actionTypes = {
   setImageData: 'CANVAS//SET_IMAGE_DATA',
   draw: 'CANVAS//DRAW',
   clear: 'CANVAS//CLEAR',
+  setCanvas: 'CANVAS//SET_CANVAS',
+  setBufferCanvas: 'CANVAS//SET_BUFFER_CANVAS',
+  setTransform: 'CANVAS//SET_TRANSFORM',  
 };
+
+export function setBufferCanvas(canvas: HTMLCanvasElement) {
+  return ({
+    type: actionTypes.setBufferCanvas,
+    payload: { canvas }
+  });
+}
+
+export function setCanvas(canvas: HTMLCanvasElement) {
+  return ({
+    type: actionTypes.setCanvas,
+    payload: { canvas }
+  });
+}
+
+export function setTransformMatrix(matrix: TransformMatrix) {
+  return ({
+    type: actionTypes.setTransform,
+    payload: matrix
+  });
+}
 
 export function setImageData(imageData: ImageData, layer: number) {
   return ({

@@ -11,3 +11,7 @@ export const getImageData = createSelector(getCanvas, (canvas) => {
 export const getDirtyBounds = createSelector(getCanvas, (canvas) => {
   return canvas.dirtyBounds;
 });
+
+export function getTransformMatrix(state: ReduxState) {
+  return state.canvas.transformMatrix;
+}

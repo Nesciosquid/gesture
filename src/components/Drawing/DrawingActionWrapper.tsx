@@ -6,7 +6,7 @@ import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
 import { TransformMatrix, Transform } from '../../utils/transform';
 import * as Pressure from 'pressure';
-import { getTransformMatrix } from '../../selectors/viewport';
+import { getTransformMatrix } from '../../selectors/canvas';
 import { changePressure } from '../../actions/tools';
 import * as _ from 'lodash';
 

@@ -10,7 +10,6 @@ import { startSampling, stopSampling, addSample } from './performance';
 export const actionTypes = {
   startDrawing: 'VIEWPORT//START_DRAWING',
   stopDrawing: 'VIEWPORT//STOP_DRAWING',
-  setTransform: 'VIEWPORT//SET_TRANSFORM',
   storeGestureParams: 'VIEWPORT//STORE_GESTURE_PARAMS',
   clearGestureParams: 'VIEWPORT//CLEAR_GESTURE_PARAMS',
   storeDrawParams: 'VIEWPORT//STORE_DRAW_PARAMS',
@@ -40,13 +39,6 @@ export function storeGestureParams(params: GestureParams) {
   return ({
     type: actionTypes.storeGestureParams,
     payload: params
-  });
-}
-
-export function setTransformMatrix(matrix: TransformMatrix) {
-  return ({
-    type: actionTypes.setTransform,
-    payload: matrix
   });
 }
 

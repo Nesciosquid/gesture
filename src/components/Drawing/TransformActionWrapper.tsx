@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ReactChild } from 'react';
-import { setTransformMatrix, drawWithCurrentTool,
+import { drawWithCurrentTool,
   startDrawing, stopDrawing, storeGestureParams, clearStoredGestureParams } from '../../actions/viewport';
+import { setTransformMatrix } from '../../actions/canvas';
 // import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
 import { TransformMatrix, Transform } from '../../utils/transform';
-import { getTransformMatrix, getStoredGestureParams } from '../../selectors/viewport';
+import { getTransformMatrix } from '../../selectors/canvas';
+import { getStoredGestureParams } from '../../selectors/viewport';
 import * as Hammer from 'hammerjs';
 import { logHammerAction } from '../../actions/tools';
 import { DrawPosition } from '../../types/canvas/index';
