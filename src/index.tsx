@@ -31,7 +31,7 @@ ReactDOM.render(
   <Provider store={store}>
     <BrowserRouter>
       <Switch>
-        <Route exact={true} path={process.env.PUBLIC_URL + '/'} component={CanvasExample} />
+        <Route exact={true} path={process.env.PUBLIC_URL + '/'} component={App} />
         <Route path={process.env.PUBLIC_URL + '/draw'} component={CanvasExample} />
       </Switch>
     </BrowserRouter>
