@@ -25,11 +25,15 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
     this.initPressure();
   }
   initPressure = () => {
-    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 50);
-    Pressure.set(this.drawWrapper, {
-      change: throttledSetChange,
-      end: () => this.props.changePressure(0, null)
-    });    
+    const throttledSetChange = _.throttle((force, event) => this.props.changePressure(force, event), 0);
+    Pressure.set(
+      this.drawWrapper, 
+      {
+        change: throttledSetChange,
+        end: () => this.props.changePressure(0, null), 
+      },
+      { only: 'pointer' }
+    );
   }
   render() {
     const transform = new Transform(this.props.transformMatrix);
@@ -40,12 +44,14 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
         onTouchStart={(event: TouchEvent<HTMLDivElement>) => {
           event.preventDefault();
           event.stopPropagation();
-          const touch = event.touches[0];
-          const x = touch.clientX - 220;
-          const y = touch.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          if (event.touches.length === 1) {
-            this.props.startDrawing(position);
+          for (let i = 0; i < event.touches.length; i++ ) {
+            const thisTouch: any = event.touches[i]; //tslint:disable-line
+            if (thisTouch.touchType === 'stylus') {
+              const x = thisTouch.clientX - 220;
+              const y = thisTouch.clientY;
+              const position = transform.invert().transformPoint({ x, y });  
+              this.props.startDrawing(position);              
+            }
           }
         }}
         onTouchEnd={(event: TouchEvent<HTMLDivElement>) => {
@@ -56,12 +62,14 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
         onTouchMove={(event: TouchEvent<HTMLDivElement>) => {
           event.preventDefault();
           event.stopPropagation();
-          const touch = event.touches[0];
-          const x = touch.clientX - 220;
-          const y = touch.clientY;
-          const position = transform.invert().transformPoint({ x, y });  
-          if (event.touches.length === 1) {
-            this.props.draw(position);            
+          for (let i = 0; i < event.touches.length; i++ ) {
+            const thisTouch: any = event.touches[i]; //tslint:disable-line
+            if (thisTouch.touchType === 'stylus') {
+              const x = thisTouch.clientX - 220;
+              const y = thisTouch.clientY;
+              const position = transform.invert().transformPoint({ x, y });  
+              this.props.draw(position);              
+            }
           }
         }}
         onMouseDown={(event: MouseEvent<HTMLDivElement>) => {
@@ -94,6 +102,10 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
   }
 }
 
+// const getPosition = (event: MouseEvent<HTMLDataElement> | TouchEvent<HTMLDivElement>) => {
+//   return { x: event. - 220, y: }
+// }
+
 const mapStateToProps = (state: ReduxState) => ({
   transformMatrix: getTransformMatrix(state),
 });
@@ -108,7 +120,7 @@ const mapDispatchToProps = (dispatch: Function) => ({
   startDrawing: (position: DrawPosition) => {
     dispatch(startDrawing(position));
   },
-  changePressure: (force: number, event: Event | null) => {
+  changePressure: (force: number, event: PointerEvent | null) => {
     dispatch(changePressure(force, event));
   },
 });

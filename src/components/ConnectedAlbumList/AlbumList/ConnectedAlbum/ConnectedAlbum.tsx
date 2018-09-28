@@ -3,14 +3,15 @@ import { setAlbumSelection } from '../../../../actions/images';
 import { isAlbumSelected } from '../../../../selectors/images';
 import { ReduxState } from '../../../../reducers/';
 import { ImgurAlbumData } from '../../../../utils/imgur';
-import Album from './Album/Album';
+import AlbumComponent from './Album/Album';
+import { Album } from '../../../../utils/images';
 
 interface ConnectedAlbumProps {
-    album: ImgurAlbumData;
+    album: Album;
 }
 
 function mapStateToProps(state: ReduxState, { album }: ConnectedAlbumProps) {
-    const selected = isAlbumSelected(state, album.id);
+    const selected = isAlbumSelected(state, album.getId());
     return ({
         selected,
     });
@@ -18,8 +19,8 @@ function mapStateToProps(state: ReduxState, { album }: ConnectedAlbumProps) {
 
 function mapDispatchToProps(dispatch: Function, { album }: ConnectedAlbumProps) {
     return ({
-        onClick: (selected: boolean) => { dispatch(setAlbumSelection(album.id, selected)); }
+        onClick: (selected: boolean) => { dispatch(setAlbumSelection(album.getId(), selected)); }
     });
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Album);
+export default connect(mapStateToProps, mapDispatchToProps)(AlbumComponent);
