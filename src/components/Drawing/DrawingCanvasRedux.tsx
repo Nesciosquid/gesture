@@ -4,11 +4,12 @@ import { setImageData, setBufferCanvas, setCanvas } from '../../actions/canvas';
 import { ReduxState } from '../../reducers/index';
 import { getImageData, getDirtyBounds } from '../../selectors/canvas';
 import { getTransformMatrix } from '../../selectors/canvas';
-import { initCanvas, DrawBounds, getPartialImageData, redrawSourceOntoTarget } from '../../utils/canvas';
+import { initCanvas, DrawBounds, getPartialImageData, redrawSourceOntoTarget, getColorData, drawColorOntoTarget } from '../../utils/canvas';
 import { TransformMatrix } from '../../utils/transform';
 import ConnectedDrawingActionWrapper from './ConnectedDrawingActionWrapper';
 import ConnectedTransformActionWrapper from './ConnectedTransformActionWrapper';
 import { stopLog } from '../../actions/performance';
+import { RGBColor } from 'react-color';
 
 interface DrawingCanvasProps {
   transformMatrix: TransformMatrix;
@@ -21,19 +22,30 @@ export default class DrawingCanvas extends React.Component<DrawingCanvasProps> {
     super(props);
   }
   componentDidMount() {
-    const { sourceCanvas, transformMatrix } = this.props;
-    this.redrawCanvas(sourceCanvas, transformMatrix); 
+    // const { sourceCanvas, transformMatrix } = this.props;
+    // this.redrawCanvas(sourceCanvas, transformMatrix); 
+    // this.blankCanvas();
+    this.initCanvas();
+    this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix);
+    // this.colorCanvas();
   }
-  componentWillReceiveProps(nextProps: DrawingCanvasProps) {
-    const { sourceCanvas, transformMatrix } = nextProps;
-    this.redrawCanvas(sourceCanvas, transformMatrix);
+
+  initCanvas = () => {
+    if (this.canvas) {
+      this.canvas.width = this.canvas.clientWidth;
+      this.canvas.height = this.canvas.clientHeight;
+    }
   }
+  
   redrawCanvas = (sourceCanvas: HTMLCanvasElement, matrix: TransformMatrix) => {
     if (this.canvas) {
       redrawSourceOntoTarget(this.canvas, sourceCanvas, matrix);      
     }
   }
+
   render() {
+    this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix);
+    // this.colorCanvas();
     return (
       <ConnectedTransformActionWrapper>
         <ConnectedDrawingActionWrapper>

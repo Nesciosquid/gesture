@@ -251,6 +251,14 @@ export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBou
   };
 }
 
+export function drawColorOntoTarget(targetCanvas: HTMLCanvasElement, color: RGBColor) {
+  const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
+  if (context) {
+    const bg = getColorData(color, targetCanvas.width, targetCanvas.height);
+    context.putImageData(bg, 0, 0);
+  }
+}
+
 export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCanvas: HTMLCanvasElement, 
                                        matrix: TransformMatrix ) {
   const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;

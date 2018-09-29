@@ -32,7 +32,6 @@ export default class DrawingActionWrapper extends React.Component<DrawingActionW
         change: throttledSetChange,
         end: () => this.props.changePressure(0, null), 
       },
-      { only: 'pointer' }
     );
   }
   render() {

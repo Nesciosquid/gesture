@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { ReactChild } from 'react';
-import { drawWithCurrentTool,
-  startDrawing, stopDrawing, storeGestureParams, clearStoredGestureParams } from '../../actions/viewport';
+import { storeGestureParams, clearStoredGestureParams } from '../../actions/viewport';
 import { setTransformMatrix } from '../../actions/canvas';
 // import { DrawPosition } from '../../types/canvas/index';
 import { ReduxState } from '../../reducers/index';
@@ -25,9 +24,6 @@ interface TransformActionWrapperProps {
   clearGestureParams: () => void;
   storedGestureParams: GestureParams | undefined;
   children: ReactChild | ReactChild[];
-  draw: (position: DrawPosition) => void;   
-  startDrawing: (position: DrawPosition) => void;
-  stopDrawing: () => void;
   tool: Tool | undefined;
 }
 

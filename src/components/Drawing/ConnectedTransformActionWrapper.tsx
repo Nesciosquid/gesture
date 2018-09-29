@@ -31,15 +31,6 @@ const mapDispatchToProps = (dispatch: Function) => ({
   clearGestureParams: () => {
     dispatch(clearStoredGestureParams());
   },
-  startDrawing: (position: DrawPosition) => {
-    dispatch(startDrawing(position));
-  },
-  stopDrawing: () => {
-    dispatch(stopDrawing);
-  },
-  draw: (position: DrawPosition) => {
-    dispatch(drawWithCurrentTool(position));
-  },
   setTransformMatrix: (matrix: TransformMatrix) => {
     dispatch(setTransformMatrix(matrix));
   },

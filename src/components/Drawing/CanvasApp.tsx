@@ -21,8 +21,8 @@ class CanvasApp extends React.Component<CanvasAppProps, {}> {
           <ToolsPanel />
         </div>
         <div className="canvas-container">
-          {/* <CanvasWrapper /> */}
-          <DrawingCanvas />
+          <CanvasWrapper />
+          {/* <DrawingCanvas /> */}
         </div>
       </div>
     );
