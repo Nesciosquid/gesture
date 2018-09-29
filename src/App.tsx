@@ -1,14 +1,15 @@
 import * as React from 'react';
 import './App.scss';
-import { getImage, ImgurImageData } from './utils/imgur';
+import {  } from './utils/imgur';
 import CircularProgressbar from 'react-circular-progressbar';
 import AlbumModal from './components/AlbumModal/AlbumModal';
 import TimeSettingsModal from './components/TimeSettingsModal/TimeSettingsModal';
+import { AlbumImage } from './utils/images';
 
 const defaultAdvanceTime = 60;
 
 interface AppProps {
-  allImages: ImgurImageData[];
+  allImages: AlbumImage[];
   fetchAlbum: (albumId: string) => void;
   advanceTime: number;  
   autoAdvance: boolean;
@@ -18,9 +19,9 @@ interface AppProps {
 interface AppState {
   albumId: string;
   currentImageIndex?: number;
-  shuffledImages?: ImgurImageData[];
+  shuffledImages?: AlbumImage[];
   remainingTime: number;
-  previousImages: ImgurImageData[];
+  previousImages: AlbumImage[];
   error: boolean;
   timer: number;
   albumsModal: boolean;
@@ -53,7 +54,7 @@ class App extends React.Component<AppProps, AppState>  {
       }
     }
   }
-  logImage = (image: ImgurImageData) => {
+  logImage = (image: AlbumImage) => {
     const previousImages = this.state.previousImages.concat();
     previousImages.push(image);
     this.setState({
@@ -66,8 +67,9 @@ class App extends React.Component<AppProps, AppState>  {
     }
   }
   getCurrentImage = () => {
-    if (this.state.shuffledImages && this.state.currentImageIndex !== undefined && this.state.shuffledImages.length > 0) {
-      const image = getImage(this.state.shuffledImages[this.state.currentImageIndex]);
+    if (this.state.shuffledImages && this.state.currentImageIndex !== undefined 
+      && this.state.shuffledImages.length > 0) {
+      const image = this.state.shuffledImages[this.state.currentImageIndex];
       return image;
     } else { return null; }
   }
@@ -85,7 +87,7 @@ class App extends React.Component<AppProps, AppState>  {
       }
     }
   }
-  shuffleImages = (images: ImgurImageData[]) => {
+  shuffleImages = (images: AlbumImage[]) => {
     this.setState({
       shuffledImages: images.sort(() => Math.random() - 0.5),
       currentImageIndex: 0,
@@ -118,7 +120,7 @@ class App extends React.Component<AppProps, AppState>  {
       return null;
     } 
 
-    return <img src={current.sizes.default.href} className="hero-image" />;  
+    return <img src={current.getUrl().toString()} className="hero-image" />;  
   }
   toggleAlbumsModal = () => {
     this.setState({

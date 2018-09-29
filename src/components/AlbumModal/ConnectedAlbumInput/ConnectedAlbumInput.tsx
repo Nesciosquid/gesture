@@ -1,10 +1,11 @@
 import { connect } from 'react-redux';
-import { fetchAlbumFromImgur } from '../../../actions/images';
+import { fetchAlbumFromImgur, fetchAlbumFromGoogleDrive} from '../../../actions/images';
 import AlbumInput from './AlbumInput/AlbumInput';
 
 function mapDispatchToProps(dispatch: Function) {
     return ({
-        onSubmit: (albumId: string) => { dispatch(fetchAlbumFromImgur(albumId)); }
+        fetchImgurAlbum: (albumId: string) => { dispatch(fetchAlbumFromImgur(albumId)); },
+        fetchGoogleDriveAlbum: (albumId: string) => { dispatch(fetchAlbumFromGoogleDrive(albumId)); }
     });
 }
 

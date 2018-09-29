@@ -1,0 +1,36 @@
+.draw-wrapper {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+}
+
+.transform-wrapper {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+}
+
+.drawing-app {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.drawing-canvas {
+  background-color: rgb(40, 40, 40);
+  background-image:       linear-gradient(0deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(255, 255, 255, .05) 25%, rgba(255, 255, 255, .05) 26%, transparent 27%, transparent 74%, rgba(255, 255, 255, .05) 75%, rgba(255, 255, 255, .05) 76%, transparent 77%, transparent);
+  height:100%;
+  background-size:50px 50px;
+}
+
+.canvas-container {
+  flex-grow: 1;
+}
+
+.tools-container {
+  flex-grow: 0;
+  width: 220px;
+  background: black;
+  color: white;
+}

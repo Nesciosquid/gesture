@@ -3,32 +3,44 @@ import { InputGroup, InputGroupButton, Input, Button } from 'reactstrap';
 import './styles.css';
 
 interface AlbumInputProps {
-    onSubmit: (albumId: string) => void;
+    fetchImgurAlbum: (albumId: string) => void;
+    fetchGoogleDriveAlbum: (albumId: string) => void;
 }
 
 interface AlbumInputState {
-    albumId: string;
+    imgurAlbumId: string;
+    googleDriveAlbumId: string;
 }
 
 export default class AlbumInput extends React.Component<AlbumInputProps, AlbumInputState> {
     constructor(props: AlbumInputProps) {
         super(props);
         this.state = {
-            albumId: ''
+            imgurAlbumId: '',
+            googleDriveAlbumId: '',
         };
     }
 
-    setAlbumId = (albumId: string) => {
+    setGoogleDriveAlbumId = (albumId: string) => {
+      this.setState({
+        googleDriveAlbumId: albumId
+      });
+    }
+
+    setImgurAlbumId = (albumId: string) => {
         this.setState({
-            albumId
+            imgurAlbumId: albumId
         });
     }
 
-    fetchAlbum = () => {
-        this.props.onSubmit(this.state.albumId);
-        this.setState({
-            albumId: ''
-        });
+    fetchImgurAlbum = () => {
+        this.props.fetchImgurAlbum(this.state.imgurAlbumId);
+        this.setImgurAlbumId('');
+    }
+
+    fetchGoogleDriveAlbum = () => {
+      this.props.fetchGoogleDriveAlbum(this.state.googleDriveAlbumId);
+      this.setGoogleDriveAlbumId('');
     }
 
     render() {
@@ -36,14 +48,26 @@ export default class AlbumInput extends React.Component<AlbumInputProps, AlbumIn
             <div className="album-input-container"> 
                 <InputGroup>
                     <InputGroupButton>
-                        <Button onClick={this.fetchAlbum}>
+                        <Button onClick={this.fetchImgurAlbum}>
                             Add Imgur Album
                         </Button>
                     </InputGroupButton>
                     <Input 
                         placeholder="ABCDE" 
-                        value={this.state.albumId} 
-                        onChange={(event) => this.setAlbumId(event.target.value)} 
+                        value={this.state.imgurAlbumId} 
+                        onChange={(event) => this.setImgurAlbumId(event.target.value)} 
+                    />
+                </InputGroup>
+                <InputGroup>
+                    <InputGroupButton>
+                        <Button onClick={this.fetchGoogleDriveAlbum}>
+                            Add Google Drive Album
+                        </Button>
+                    </InputGroupButton>
+                    <Input 
+                        placeholder="12345" 
+                        value={this.state.googleDriveAlbumId} 
+                        onChange={(event) => this.setGoogleDriveAlbumId(event.target.value)} 
                     />
                 </InputGroup>
             </div>

@@ -11,6 +11,11 @@
   }
 }
 
+#root {
+  height: 100%;
+  width: 100%;
+}
+
 .hero-image-container {
   flex-grow: 1;
   display: flex;

@@ -1,5 +1,7 @@
 import { ImgurAlbumData, getAlbum } from '../utils/imgur';
+import * as drive from '../utils/googleDrive';
 import { ReduxAction } from './';
+import { Album } from '../utils/images';
 
 export const actionTypes = {
     addAlbum: 'ADD_ALBUM',
@@ -7,7 +9,7 @@ export const actionTypes = {
     logError: 'LOG_ERROR'
 };
 
-export function addAlbum(album: ImgurAlbumData | Promise<ImgurAlbumData>): ReduxAction {
+export function addAlbum(album: Album | Promise<Album>): ReduxAction {
     return ({
         type: actionTypes.addAlbum,
         payload: album
@@ -31,11 +33,19 @@ export function logError(error: string) {
     });
 }
 
+export function fetchAlbumFromGoogleDrive(albumId: string): Promise<ReduxAction> {
+  return drive.getAlbum(albumId).then(album => {
+    return addAlbum(album);
+  });
+}
+
 export function fetchAlbumFromImgur(albumId: string): Promise<ReduxAction> {
     return getAlbum(albumId).then(album => {
-        if (!album.error) {
-            return addAlbum(album);            
-        } 
-        return logError(album.error);
+      const error = album.getError();
+      if (!error) {
+          return addAlbum(album);            
+      } else {
+        return logError(error);          
+      }
     });
 }
