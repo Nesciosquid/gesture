@@ -31,7 +31,7 @@ interface TransformActionWrapperProps {
   tool: Tool | undefined;
 }
 
-class DrawingActionWrapper extends React.Component<TransformActionWrapperProps> {
+export default class TransformActionWrapper extends React.Component<TransformActionWrapperProps> {
   transformWrapper: HTMLDivElement | null;
   hammer: HammerManager | null;
   componentDidMount() {
@@ -146,35 +146,3 @@ class DrawingActionWrapper extends React.Component<TransformActionWrapperProps> 
     );
   }
 }
-
-const mapStateToProps = (state: ReduxState) => ({
-  transformMatrix: getTransformMatrix(state),
-  storedGestureParams: getStoredGestureParams(state),
-  tool: getSelectedTool(state)
-});
-
-const mapDispatchToProps = (dispatch: Function) => ({
-  storeGestureParams: (params: GestureParams) => {
-    dispatch(storeGestureParams(params));
-  },
-  clearGestureParams: () => {
-    dispatch(clearStoredGestureParams());
-  },
-  startDrawing: (position: DrawPosition) => {
-    dispatch(startDrawing(position));
-  },
-  stopDrawing: () => {
-    dispatch(stopDrawing);
-  },
-  draw: (position: DrawPosition) => {
-    dispatch(drawWithCurrentTool(position));
-  },
-  setTransformMatrix: (matrix: TransformMatrix) => {
-    dispatch(setTransformMatrix(matrix));
-  },
-  logHammerAction: (type: string, event: HammerInput) => {
-    dispatch(logHammerAction(type, event));
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(DrawingActionWrapper);

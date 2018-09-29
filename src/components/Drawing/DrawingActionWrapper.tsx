@@ -19,7 +19,7 @@ interface DrawingActionWrapperProps {
   changePressure: (force: number, event: Event | null) => void;
 }
 
-class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
+export default class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
   drawWrapper: HTMLDivElement | null;
   componentDidMount() {
     this.initPressure();
@@ -101,28 +101,3 @@ class DrawingActionWrapper extends React.Component<DrawingActionWrapperProps> {
     );
   }
 }
-
-// const getPosition = (event: MouseEvent<HTMLDataElement> | TouchEvent<HTMLDivElement>) => {
-//   return { x: event. - 220, y: }
-// }
-
-const mapStateToProps = (state: ReduxState) => ({
-  transformMatrix: getTransformMatrix(state),
-});
-
-const mapDispatchToProps = (dispatch: Function) => ({
-  draw: (position: DrawPosition) => {
-    dispatch(drawWithCurrentTool(position));
-  },
-  stopDrawing: () => { 
-    dispatch(stopDrawing());
-  },
-  startDrawing: (position: DrawPosition) => {
-    dispatch(startDrawing(position));
-  },
-  changePressure: (force: number, event: PointerEvent | null) => {
-    dispatch(changePressure(force, event));
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(DrawingActionWrapper);

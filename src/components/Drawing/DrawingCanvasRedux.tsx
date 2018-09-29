@@ -4,10 +4,9 @@ import { setImageData, setBufferCanvas, setCanvas } from '../../actions/canvas';
 import { ReduxState } from '../../reducers/index';
 import { getImageData, getDirtyBounds } from '../../selectors/canvas';
 import { getTransformMatrix } from '../../selectors/canvas';
-import { initCanvas, DrawBounds, getPartialImageData } from '../../utils/canvas';
+import { initCanvas, DrawBounds, getPartialImageData, redrawSourceOntoTarget } from '../../utils/canvas';
 import { TransformMatrix } from '../../utils/transform';
-import ConnectedTransformActionWrapper from './ConnectedTransformActionWrapper';
-import ConnectedDrawingActionWrapper from './ConnectedDrawingActionWrapper';
+import DrawingActionWrapper from './DrawingActionWrapper';
 import TransformActionWrapper from './TransformActionWrapper';
 import { stopLog } from '../../actions/performance';
 
@@ -18,6 +17,7 @@ interface DrawingCanvasProps {
   setCanvas: (canvas: HTMLCanvasElement) => void;
   setBufferCanvas: (Canvas: HTMLCanvasElement) => void;
   dirtyBounds: DrawBounds;
+  sourceCanvas: HTMLCanvasElement;
 }
 
 class DrawingCanvas extends React.Component<DrawingCanvasProps> {
@@ -42,40 +42,28 @@ class DrawingCanvas extends React.Component<DrawingCanvasProps> {
       this.props.setCanvas(this.canvas);      
     }
     const { imageData, transformMatrix } = this.props;
-    this.redrawCanvas(imageData, transformMatrix);
+    //this.redrawCanvas(imageData, transformMatrix);
   }
   componentWillReceiveProps(nextProps: DrawingCanvasProps) {
-    // const { imageData, transformMatrix } = nextProps;
-    // this.redrawCanvas(imageData, transformMatrix);
+    const { sourceCanvas, transformMatrix } = nextProps;
+    this.redrawCanvas(sourceCanvas, transformMatrix);
   }
-  redrawCanvas = async (imageData: ImageData, matrix: TransformMatrix) => {
-    if (this.canvas && imageData) {
-      const context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
-      const bufferContext = this.bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
-      const dirtyBounds = this.props.dirtyBounds;
-      const partialData = getPartialImageData(this.props.imageData, dirtyBounds).data;
-      const partialImageData = new ImageData(partialData, dirtyBounds.width, dirtyBounds.height);
-      bufferContext.putImageData(partialImageData, 0, 0, dirtyBounds.minX, 
-                                 dirtyBounds.maxX, dirtyBounds.width, dirtyBounds.height);
-      context.setTransform(1, 0, 0, 1, 0, 0);
-      context.clearRect(0, 0, this.canvas.width, this.canvas.height);          
-      context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);
-      initCanvas(this.bufferCanvas, imageData.width, imageData.height, imageData);
-      context.drawImage(this.bufferCanvas, 0, 0);
-      this.props.stopLog();
+  redrawCanvas = (sourceCanvas: HTMLCanvasElement, matrix: TransformMatrix) => {
+    if (this.canvas) {
+      redrawSourceOntoTarget(this.canvas, sourceCanvas, matrix);      
     }
   }
   render() {
     return (
-      <ConnectedTransformActionWrapper>
-        <ConnectedDrawingActionWrapper>
+      // <TransformActionWrapper>
+      //   <DrawingActionWrapper>
           <canvas 
             className="drawing-canvas"
             ref={(canvas) => { this.canvas = canvas; }} 
             style={{ flexGrow: 1}}
           />
-        </ConnectedDrawingActionWrapper>
-      </ConnectedTransformActionWrapper>
+      //   </DrawingActionWrapper>
+      // </TransformActionWrapper>
     );
   }
 }

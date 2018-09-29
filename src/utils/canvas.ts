@@ -5,6 +5,7 @@ import lerp from 'lerp';
 import * as FileSaver from 'file-saver';
 import * as _ from 'lodash';
 import { DrawLayer } from '../reducers/canvas';
+import { TransformMatrix } from './transform';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -248,6 +249,15 @@ export function getPartialImageData(imageData: ImageDataWrapper, bounds: DrawBou
     width: bounds.width,
     height: bounds.height
   };
+}
+
+export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCanvas: HTMLCanvasElement, 
+                                       matrix: TransformMatrix ) {
+  const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, sourceCanvas.width, sourceCanvas.height);          
+  context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);
+  context.drawImage(sourceCanvas, 0, 0);
 }
 
 export function drawGradientsInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) { 
