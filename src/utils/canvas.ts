@@ -4,7 +4,6 @@ import Tool from '../types/tools/Tool';
 import lerp from 'lerp';
 import * as FileSaver from 'file-saver';
 import * as _ from 'lodash';
-import { DrawLayer } from '../reducers/canvas';
 import { TransformMatrix } from './transform';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
@@ -149,46 +148,46 @@ export function getColorData(color: RGBColor, width: number, height: number) {
   return new ImageData(data, width, height);
 }
 
-export function updateFromLayers(imageData: ImageData, layers: DrawLayer[], bounds: DrawBounds): ImageData {
-  const partialBackground = getPartialImageData(layers[0].imageData, bounds);
-  const initialData = new ImageData(partialBackground.data, bounds.width, bounds.height);
-  combineContext.putImageData(initialData, 0, 0, 0, 0, bounds.width, bounds.height);
-  initCanvas(combineCanvas, bounds.width, bounds.height, initialData);
-  initCanvas(bufferCanvas, bounds.width, bounds.height);
-  const tempArray = new Uint8ClampedArray(bounds.width * bounds.height * 4);
-  layers.forEach((layer, index) => {
-    if (index !== 0) {
-      const partialData = getPartialImageData(layer.imageData, bounds, tempArray).data;
-      const image = new ImageData(partialData, bounds.width, bounds.height);
-      bufferContext.putImageData(image, 0, 0, 0, 0, bounds.width, bounds.height);
-      combineContext.globalCompositeOperation = 'source-over';
-      combineContext.drawImage(bufferCanvas, 0, 0);
-    }
-  });
-  const updatedPartialData = combineContext.getImageData(0, 0, bounds.width, bounds.height);
-  const newData = putPartialImageData(imageData, updatedPartialData, bounds);
-  return new ImageData(newData.data, imageData.width, imageData.height);
-}
+// export function updateFromLayers(imageData: ImageData, layers: DrawLayer[], bounds: DrawBounds): ImageData {
+//   const partialBackground = getPartialImageData(layers[0].imageData, bounds);
+//   const initialData = new ImageData(partialBackground.data, bounds.width, bounds.height);
+//   combineContext.putImageData(initialData, 0, 0, 0, 0, bounds.width, bounds.height);
+//   initCanvas(combineCanvas, bounds.width, bounds.height, initialData);
+//   initCanvas(bufferCanvas, bounds.width, bounds.height);
+//   const tempArray = new Uint8ClampedArray(bounds.width * bounds.height * 4);
+//   layers.forEach((layer, index) => {
+//     if (index !== 0) {
+//       const partialData = getPartialImageData(layer.imageData, bounds, tempArray).data;
+//       const image = new ImageData(partialData, bounds.width, bounds.height);
+//       bufferContext.putImageData(image, 0, 0, 0, 0, bounds.width, bounds.height);
+//       combineContext.globalCompositeOperation = 'source-over';
+//       combineContext.drawImage(bufferCanvas, 0, 0);
+//     }
+//   });
+//   const updatedPartialData = combineContext.getImageData(0, 0, bounds.width, bounds.height);
+//   const newData = putPartialImageData(imageData, updatedPartialData, bounds);
+//   return new ImageData(newData.data, imageData.width, imageData.height);
+// }
 
-export function combineLayers(layers: DrawLayer[]) {
-  const background = layers[0];
-  const width = background.imageData.width;
-  const height = background.imageData.height;
-  initCanvas(combineCanvas, width, height, background.imageData);
-  initCanvas(bufferCanvas, width, height);
-  layers.forEach((layer, index) => {
-    if (index !== 0) {
-      if (layer.imageData.width !== width || layer.imageData.height !== height) {
-        throw new Error(`Layer imagedata has wrong width or height. 
-          Background has width ${width} and height ${height}. 
-          Layer has width ${layer.imageData.width} and height ${layer.imageData.height})`);
-      }
-      bufferContext.putImageData(layer.imageData, 0, 0);
-      combineContext.drawImage(bufferCanvas, 0, 0);
-    }
-  });
-  return getAllImageData(combineContext);
-}
+// export function combineLayers(layers: DrawLayer[]) {
+//   const background = layers[0];
+//   const width = background.imageData.width;
+//   const height = background.imageData.height;
+//   initCanvas(combineCanvas, width, height, background.imageData);
+//   initCanvas(bufferCanvas, width, height);
+//   layers.forEach((layer, index) => {
+//     if (index !== 0) {
+//       if (layer.imageData.width !== width || layer.imageData.height !== height) {
+//         throw new Error(`Layer imagedata has wrong width or height. 
+//           Background has width ${width} and height ${height}. 
+//           Layer has width ${layer.imageData.width} and height ${layer.imageData.height})`);
+//       }
+//       bufferContext.putImageData(layer.imageData, 0, 0);
+//       combineContext.drawImage(bufferCanvas, 0, 0);
+//     }
+//   });
+//   return getAllImageData(combineContext);
+// }
 
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
                                     bounds: DrawBounds, targetArray?: Uint8ClampedArray): ImageDataWrapper {
@@ -268,7 +267,9 @@ export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCa
   context.drawImage(sourceCanvas, 0, 0);
 }
 
-export function drawGradientsInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) { 
+export function drawGradientsInContext(context: CanvasRenderingContext2D, params: DrawParams, 
+                                       lastTargetParams?: DrawParams) { 
+  const lastParams = lastTargetParams || params;
   const position = params.position;
   const lastPosition = lastParams.position;
   const distance = distanceBetween(lastPosition, position);
@@ -313,12 +314,12 @@ export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
   };
 }
 
-export function drawLinesInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) {
+export function drawLinesInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams?: DrawParams) {
   const color = params.color;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
-  drawLineSegments(context, 1, params, lastParams);
+  drawLineSegments(context, 1, params, lastParams || params);
 }
 
 export function drawLines(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
@@ -379,19 +380,8 @@ export function getPatternCanvas(image: HTMLImageElement, patternScale: number, 
   return patternCanvas;
 }
 
-export function drawFromPattern(imageData: ImageData, 
-                                params: DrawParams, lastParams: DrawParams): ImageData {
-  const context = bufferContext;
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
-  if (!params.tool.grainImage) {
-    throw new Error('No grain image found for tool!');
-  }
-  drawFromPatternInContext(context, params, lastParams);
-  return context.getImageData(0, 0, imageData.width, imageData.height);
-}
-
 export function drawFromPatternInContext(context: CanvasRenderingContext2D, params: DrawParams, 
-                                         lastParams: DrawParams) {
+                                         lastParams?: DrawParams) {
   if (!params.tool.grainImage) {
     throw new Error('No grain image found for tool!');
   }
@@ -401,5 +391,5 @@ export function drawFromPatternInContext(context: CanvasRenderingContext2D, para
   context.lineWidth = params.size;
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
-  drawLineSegments(context, params.size / 2, params, lastParams);
+  drawLineSegments(context, params.size / 2, params, lastParams || params);
 }

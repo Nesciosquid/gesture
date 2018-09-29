@@ -15,17 +15,14 @@ export const DefaultPerformanceState: PerformanceState =  {
 };
 
 function startSampling(state: PerformanceState): PerformanceState {
-  console.log('starting sampling');
   return { ...state, samples: 0, samplingStart: Date.now(), samplingEnd: undefined };
 }
 
 function stopSampling(state: PerformanceState): PerformanceState {
-  console.log('stopping sampling');  
   return { ...state, samplingEnd: Date.now() };
 }
 
 function addSample(state: PerformanceState): PerformanceState {
-  console.log('adding sample');
   return { ...state, samples: state.samples + 1 };
 }
 

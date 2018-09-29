@@ -1,42 +1,40 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
 import { ReactChild } from 'react';
-import { storeGestureParams, clearStoredGestureParams } from '../../actions/viewport';
-import { setTransformMatrix } from '../../actions/canvas';
-// import { DrawPosition } from '../../types/canvas/index';
-import { ReduxState } from '../../reducers/index';
 import { TransformMatrix, Transform } from '../../utils/transform';
-import { getTransformMatrix } from '../../selectors/canvas';
-import { getStoredGestureParams } from '../../selectors/viewport';
 import * as Hammer from 'hammerjs';
-import { logHammerAction } from '../../actions/tools';
 import { DrawPosition } from '../../types/canvas/index';
-import { getSelectedTool } from '../../selectors/tools';
-import Tool from '../../types/tools/Tool';
-import { ToolType } from '../../types/tools/index';
-import { GestureParams } from '../../reducers/viewport';
 
-interface TransformActionWrapperProps {
-  logHammerAction: (type: string, event: HammerInput) => void;
+export interface TransformActionWrapperProps {
+  logHammerAction?: (type: string, event: HammerInput) => void;
   transformMatrix: TransformMatrix;
   setTransformMatrix: (matrix: TransformMatrix) => void;  
-  storeGestureParams: (params: GestureParams) => void;
-  clearGestureParams: () => void;
-  storedGestureParams: GestureParams | undefined;
   children: ReactChild | ReactChild[];
-  tool: Tool | undefined;
+}
+
+export interface GestureParams {
+  rotation: number;
+  center: { x: number, y: number };
+  angle: number;
+  deltaX: number;
+  deltaY: number;
+  scale: number;
 }
 
 export default class TransformActionWrapper extends React.Component<TransformActionWrapperProps> {
   transformWrapper: HTMLDivElement | null;
   hammer: HammerManager | null;
+  gestureParams: GestureParams | undefined;
   componentDidMount() {
     this.initHammer();
   }
+  clearGestureParams = () => this.gestureParams = undefined;
+  setGestureParams = (params: GestureParams) => this.gestureParams = params;
   fixEventPosition = (position: DrawPosition) => {
-    const matrix = this.props.transformMatrix;
-    const transform = new Transform(matrix);
-    return {x: position.x - 220, y: position.y };
+    if (this.transformWrapper) {
+      const boundingBox = this.transformWrapper.getBoundingClientRect();
+      return { x: position.x - boundingBox.left, y: position.y - boundingBox.top };
+    }
+    return position;
   }
   initHammer = () => {
     if (!this.transformWrapper) {
@@ -50,15 +48,19 @@ export default class TransformActionWrapper extends React.Component<TransformAct
     });      
     this.hammer.on('pinchstart', (event) => {
       const transform = new Transform(this.props.transformMatrix);      
-      const eventPoint = this.fixEventPosition(event.center);      
-      this.props.logHammerAction('pinchstart', event);
-      this.props.storeGestureParams(event);
+      const eventPoint = this.fixEventPosition(event.center);  
+      if (this.props.logHammerAction) {
+        this.props.logHammerAction('pinchstart', event);
+      }    
+      this.setGestureParams(event);
       event.preventDefault();
     });
     this.hammer.on('pinch', (event) => {
-      this.props.logHammerAction('pinch', event);
+      if (this.props.logHammerAction) {
+        this.props.logHammerAction('pinch', event);
+      }
       const currentParams = event;
-      const lastParams = this.props.storedGestureParams;
+      const lastParams = this.gestureParams;
       if (lastParams) {
         const lastTransform = new Transform(this.props.transformMatrix);
         const currentTransform = new Transform(this.props.transformMatrix);
@@ -89,7 +91,7 @@ export default class TransformActionWrapper extends React.Component<TransformAct
           .translate(-currentPointCanvas.x, -currentPointCanvas.y);
 
         this.props.setTransformMatrix(scaled.matrix);
-        this.props.storeGestureParams(event);
+        this.setGestureParams(event);
         event.preventDefault();
       } else {
         throw new Error('no stored transform found');
@@ -97,8 +99,10 @@ export default class TransformActionWrapper extends React.Component<TransformAct
     });
     this.hammer.on('pinchend', (event) => {
       const transform = new Transform(this.props.transformMatrix);      
-      this.props.logHammerAction('pinchEnd', event);
-      this.props.clearGestureParams();
+      if (this.props.logHammerAction) {
+        this.props.logHammerAction('pinchEnd', event);
+      }
+      this.clearGestureParams();
       event.preventDefault();      
     });
     this.transformWrapper.addEventListener('dblclick', (event: MouseEvent) => {
