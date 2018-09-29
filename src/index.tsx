@@ -73,4 +73,8 @@ async function initAlbums() {
   });
 }
 
-initAlbums();
+if (!(window as any).gapi) { //tslint:disable-line
+  setTimeout(initAlbums, 10);
+} else {
+  initAlbums();
+}

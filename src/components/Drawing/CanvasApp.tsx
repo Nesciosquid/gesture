@@ -1,5 +1,6 @@
 import * as React from 'react';
 import DrawingCanvas from './DrawingCanvas';
+import CanvasWrapper from './CanvasWrapper';
 import ToolsPanel from './ToolsPanel';
 import './Drawing.scss';
 import { ReduxState } from '../../reducers/index';
@@ -20,6 +21,7 @@ class CanvasApp extends React.Component<CanvasAppProps, {}> {
           <ToolsPanel />
         </div>
         <div className="canvas-container">
+          {/* <CanvasWrapper /> */}
           <DrawingCanvas />
         </div>
       </div>

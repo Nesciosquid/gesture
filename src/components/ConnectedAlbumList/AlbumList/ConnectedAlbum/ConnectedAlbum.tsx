@@ -3,7 +3,7 @@ import { setAlbumSelection } from '../../../../actions/images';
 import { isAlbumSelected } from '../../../../selectors/images';
 import { ReduxState } from '../../../../reducers/';
 import { ImgurAlbumData } from '../../../../utils/imgur';
-import AlbumComponent from './Album/Album';
+import AlbumComponent from './Album/AlbumComponent';
 import { Album } from '../../../../utils/images';
 
 interface ConnectedAlbumProps {

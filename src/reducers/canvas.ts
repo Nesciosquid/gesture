@@ -4,7 +4,7 @@ import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { drawLines, drawGradients, drawFromPattern, getBounds, getPartialImageData, 
   putPartialImageData, DrawBounds, getColorData, updateFromLayers, combineLayers, 
-  getFullBounds, drawLinesInContext, drawFromPatternInContext, drawGradientsInContext } from '../utils/canvas';
+  getFullBounds, drawLinesInContext, drawFromPatternInContext, drawGradientsInContext, redrawSourceOntoTarget } from '../utils/canvas';
 import { RGBColor } from 'react-color';
 import { TransformMatrix, Transform } from '../utils/transform';
 import { defaultWidth, defaultHeight } from '../utils/constants';
@@ -59,12 +59,7 @@ function setOwnBufferCanvas(state: CanvasState, canvas: HTMLCanvasElement) {
 
 async function redrawCanvas (transform: TransformMatrix) {
   if (drawingCanvas && bufferCanvas) {
-    const context = drawingCanvas.getContext('2d') as CanvasRenderingContext2D;
-    const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
-    context.setTransform(1, 0, 0, 1, 0, 0);
-    context.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);          
-    context.setTransform(transform.scX, transform.skX, transform.skY, transform.scY, transform.tX, transform.tY);
-    context.drawImage(bufferCanvas, 0, 0);
+    redrawSourceOntoTarget(drawingCanvas, bufferCanvas, transform);
   }
 }
 
@@ -119,7 +114,7 @@ function draw(state: CanvasState, params: DrawParams, lastParams: DrawParams, la
   const nextPosition = params.position;
 
   let newData: ImageData;
-  const bufferContext = bufferCanvas.getContext('2d');
+  const bufferContext = bufferCanvas ? bufferCanvas.getContext('2d') : null;
 
   if (bufferContext) {
     switch (params.tool.type) {
