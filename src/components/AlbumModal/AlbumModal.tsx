@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import ConnectedAlbumList from '../../components/ConnectedAlbumList/ConnectedAlbumList';
 import ConnectedAlbumInput from './ConnectedAlbumInput/ConnectedAlbumInput';
+
 import './styles.scss';
 
 interface AlbumModalProps {
@@ -9,14 +9,25 @@ interface AlbumModalProps {
     isOpen: boolean;
 }
 
+// TODO: Rename this if we're sticking with a full screen album selection view
 export default function AlbumModal({ isOpen, toggle }: AlbumModalProps) {
+    const isOpenClass = isOpen ? 'albumPanel albumPanel-isVisible' : 'albumPanel';
+
     return (
-        <Modal className="album-modal-dialog" wrapClassName="album-modal-wrapper" modalClassName="album-modal" contentClassName="album-modal-content" isOpen={isOpen} toggle={toggle}>
-            <ModalHeader toggle={toggle}>Loaded Albums</ModalHeader>
-            <ModalBody>
-                <ConnectedAlbumInput />
-                <ConnectedAlbumList />
-            </ModalBody>
-        </Modal>
+        <div
+            className={isOpenClass}
+        >   
+            <div className="row">
+                <h1 className="col-sm-8">Choose your albums</h1>
+                <h4 
+                    onClick={toggle} 
+                    className="col-sm-4 text-right align-self-center close"
+                >
+                    <button className="btn btn-secondary">Close</button>
+                </h4>
+            </div>
+            <ConnectedAlbumInput />
+            <ConnectedAlbumList />
+        </div>
     );
 }

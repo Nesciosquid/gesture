@@ -3,6 +3,7 @@ import { ImgurAlbumData } from '../../../utils/imgur';
 import ConnectedAlbum from './ConnectedAlbum/ConnectedAlbum';
 import { ListGroup } from 'reactstrap';
 import { Album } from '../../../utils/images';
+import './styles.css';
 
 interface AlbumListProps {
     albums: Album[];

@@ -29,26 +29,35 @@ const fileFields: string[] = [
 ];
 
 export async function getAlbum(id: string): Promise<DriveAlbum> {
-  const result = 
-    await gapi.client.drive.files.list({ q: `'${id}' in parents`, fields: `files(${fileFields.join(',')})`});
+  const result = await gapi.client.drive.files.list({ 
+    q: `'${id}' in parents`, 
+    fields: `files(${fileFields.join(',')})`
+  });
+
   const albumResult = await gapi.client.drive.files.get({ fileId: id});
+  
   let title: string;
+  
   if (albumResult.result) {
     title = albumResult.result.name || id;
   } else {
     title = id;
   }
+  
   let images: gapi.client.drive.File[];
+  
   if (result.result.files) {
     images = result.result.files.filter(file => file.mimeType && file.mimeType.startsWith('image/'));      
   } else {
     images = [];
   }
+  
   return new DriveAlbum(title, id, images);
 }
 
 export class DriveAlbum implements Album {
   images: DriveAlbumImage[];
+  files: gapi.client.drive.File[];
   title: string;
   id: string;
 
@@ -63,6 +72,7 @@ export class DriveAlbum implements Album {
   getId = () => this.id;
   getService = () => GOOGLE_DRIVE_SERVICE;
   getImages = () => this.images;
+  getFiles = () => this.files;
 }
 
 export class DriveAlbumImage implements AlbumImage {

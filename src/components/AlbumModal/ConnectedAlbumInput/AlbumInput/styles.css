@@ -1,3 +1,9 @@
 .album-input-container {
-    margin-bottom: 10px;
+    margin-bottom: 24px;
+}
+.album-input-container .row {
+    margin-bottom: 12px;
+}
+.album-input-toggle {
+    margin-bottom: 12px;
 }

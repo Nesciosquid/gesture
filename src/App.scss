@@ -41,13 +41,16 @@
   align-items: flex-start;
   justify-content: space-around;
   bottom: 0px;
+  
   .skip-button {
     cursor: Pointer;
     position: relative;
     bottom: -10px;
+    
     i {
       color: white;
       font-size: 50px;
+      text-shadow: 0px 5px 25px rgba(0,0,0,0.5);
     }
   }
 
@@ -111,8 +114,8 @@
 
 .CircularProgressbar .CircularProgressbar-text {
   fill: #3e98c7;
-  font-size: 20px;
-  dominant-baseline: middle;
+  font-size: 32px;
+  dominant-baseline: central;
   text-anchor: middle;
 }
 

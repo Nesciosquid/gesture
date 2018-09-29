@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { fetchAlbumFromImgur, fetchAlbumFromGoogleDrive} from '../../../actions/images';
+import { fetchAlbumFromImgur, fetchAlbumFromGoogleDrive } from '../../../actions/images';
 import AlbumInput from './AlbumInput/AlbumInput';
 
 function mapDispatchToProps(dispatch: Function) {

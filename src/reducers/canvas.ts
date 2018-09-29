@@ -2,9 +2,23 @@ import { ReduxAction } from '../actions/index';
 import { actionTypes } from '../actions/canvas';
 import { ToolType } from '../types/tools';
 import { DrawParams, DrawPosition } from '../types/canvas';
-import { drawLines, drawGradients, drawFromPattern, getBounds, getPartialImageData, 
-  putPartialImageData, DrawBounds, getColorData, updateFromLayers, combineLayers, 
-  getFullBounds, drawLinesInContext, drawFromPatternInContext, drawGradientsInContext, redrawSourceOntoTarget } from '../utils/canvas';
+import { 
+  drawLines, 
+  drawGradients, 
+  drawFromPattern, 
+  getBounds, 
+  getPartialImageData, 
+  putPartialImageData, 
+  DrawBounds, 
+  getColorData, 
+  updateFromLayers, 
+  combineLayers, 
+  getFullBounds, 
+  drawLinesInContext, 
+  drawFromPatternInContext, 
+  drawGradientsInContext, 
+  redrawSourceOntoTarget 
+} from '../utils/canvas';
 import { RGBColor } from 'react-color';
 import { TransformMatrix, Transform } from '../utils/transform';
 import { defaultWidth, defaultHeight } from '../utils/constants';
