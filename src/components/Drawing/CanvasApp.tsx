@@ -1,5 +1,4 @@
 import * as React from 'react';
-import DrawingCanvas from './DrawingCanvas';
 import CanvasWrapper from './CanvasWrapper';
 import ToolsPanel from './ToolsPanel';
 import './Drawing.scss';
@@ -7,13 +6,37 @@ import { ReduxState } from '../../reducers/index';
 import { connect } from 'react-redux';
 import Tool from '../../types/tools/Tool';
 import { setSelectedTool } from '../../actions/tools';
+import { getColorData } from '../../utils/canvas';
+import { getSelectedTool, getColor } from '../../selectors/tools';
+import { RGBColor } from 'react-color';
+import { startSampling, stopSampling, addSample } from '../../actions/performance';
 
 export interface CanvasAppProps {
-  startingTool: Tool;
-  setSelectedTool: (tool: Tool) => void;
+  tool: Tool;
+  color: RGBColor;
+  onStartSampling: () => void;
+  onStopSampling: () => void;
+  onSample: () => void;
 }
 
 class CanvasApp extends React.Component<CanvasAppProps, {}> {
+  canvas: HTMLCanvasElement;
+  constructor(props: CanvasAppProps) {
+    super(props);
+    this.initCanvas();
+  }
+
+  initCanvas = () => {
+    this.canvas = document.createElement('canvas');    
+    this.canvas.width = 1920;
+    this.canvas.height = 1080;
+    const context = this.canvas.getContext('2d');
+    if (context) {
+      const bg = getColorData({ r: 211, g: 211, b: 211 }, this.canvas.width, this.canvas.height);
+      context.putImageData(bg, 0, 0);
+    }
+  }
+
   render() {
     return(
       <div className="drawing-app">
@@ -21,8 +44,14 @@ class CanvasApp extends React.Component<CanvasAppProps, {}> {
           <ToolsPanel />
         </div>
         <div className="canvas-container">
-          {/* <CanvasWrapper /> */}
-          <DrawingCanvas />
+          <CanvasWrapper 
+            tool={this.props.tool}
+            color={this.props.color}
+            canvas={this.canvas}
+            onStartSampling={this.props.onStartSampling}
+            onStopSampling={this.props.onStopSampling}
+            onSample={this.props.onSample}
+          />
         </div>
       </div>
     );
@@ -31,13 +60,16 @@ class CanvasApp extends React.Component<CanvasAppProps, {}> {
 
 function mapStateToProps(state: ReduxState) {
   return ({
-    startingTool: state.tools.tools.options.pencil
+    tool: getSelectedTool(state),
+    color: getColor(state)
   });
 }
 
 function mapDispatchToProps(dispatch: Function) {
   return ({
-    setSelectedTool: (tool: Tool) => dispatch(setSelectedTool(tool))
+    onStartSampling: () => dispatch(startSampling()),
+    onStopSampling: () => dispatch(stopSampling()),
+    onSample: () => dispatch(addSample())
   });
 }
 
