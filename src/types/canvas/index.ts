@@ -1,8 +1,7 @@
-import Tool from '../../types/tools/Tool';
+import { Tool } from '../../tools/Tool';
 import { RGBColor } from 'react-color';
 
 export interface DrawParams {
-  tool: Tool;
   position: DrawPosition;
   opacity: number;
   size: number;

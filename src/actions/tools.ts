@@ -2,8 +2,8 @@ import { RGBColor } from 'react-color';
 import { ReduxState } from '../reducers/index';
 import { updateGrainImage } from '../utils/canvas';
 import { getSelectedTool, getColor } from '../selectors/tools';
-import { ToolType } from '../types/tools/index';
-import Tool from '../types/tools/Tool';
+import { ToolType, Tool } from '../tools/Tool';
+import PatternTool from '../tools/PatternTool';
 
 export const actionTypes = {
     changePressure: 'TOOLS//CHANGE_PRESSURE',
@@ -43,9 +43,8 @@ export function setColor(color: RGBColor) {
   return async (dispatch: Function, getState: () => ReduxState) => {
     const state = getState();
     const tool = getSelectedTool(state);
-    if (tool && tool.type === ToolType.PATTERN) {
-      const updated = await updateGrainImage(tool, color);
-      dispatch(__setSelectedTool(updated));
+    if (tool && tool.getType() === ToolType.PATTERN) {
+      await updateGrainImage(tool as PatternTool, color);
     } 
     dispatch(__setColor(color));     
   };
@@ -71,13 +70,11 @@ export function __setSelectedTool(tool: Tool) {
 export function setSelectedTool(tool: Tool) {
   return async (dispatch: Function, getState: () => ReduxState) => {
     const state = getState();
-    if (tool.type === ToolType.PATTERN) {
+    if (tool.getType() === ToolType.PATTERN) {
       const color = getColor(state);      
-      const updated = await updateGrainImage(tool, color);
-      dispatch(__setSelectedTool(updated));
-    } else {
-      dispatch(__setSelectedTool(tool));      
+      await updateGrainImage(tool as PatternTool, color);
     }
+    dispatch(__setSelectedTool(tool));      
   };
 }
 

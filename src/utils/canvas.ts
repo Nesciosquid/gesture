@@ -1,10 +1,13 @@
 import { RGBColor } from 'react-color';
 import { DrawPosition, DrawParams } from '../types/canvas';
-import Tool from '../types/tools/Tool';
+import { Tool } from '../tools/Tool';
 import lerp from 'lerp';
 import * as FileSaver from 'file-saver';
 import * as _ from 'lodash';
 import { TransformMatrix } from './transform';
+import PatternTool from '../tools/PatternTool';
+import LineTool from '../tools/LineTool';
+import GradientTool from '../tools/GradientTool';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -34,17 +37,16 @@ export function getAllImageData(context: CanvasRenderingContext2D) {
   return context.getImageData(0, 0, context.canvas.width, context.canvas.height);
 }
 
-export async function updateGrainImage(tool: Tool, color: RGBColor): Promise<Tool> {
-  if (!tool.grainSource) {
+export async function updateGrainImage(tool: PatternTool, color: RGBColor) {
+  if (!tool.getPatternSource()) {
     throw new Error('Tool does not have a grain pattern.');
   }
-  const grainData = getImageData(tool.grainSource);
+  alert(tool.getPatternSource());
+  const grainData = getImageData(tool.getPatternSource());
   const colorized = await colorizeImageData(grainData, color);
   const colorizedImage = await getImage(colorized);
-  return {
-    ...tool,
-    grainImage: colorizedImage
-  };
+
+  tool.setPatternImage(colorizedImage);
 }
 
 export function colorizeImageData(imageData: ImageDataWrapper, color: RGBColor) {
@@ -120,13 +122,13 @@ export function initCanvas(canvas: HTMLCanvasElement, width: number, height: num
   }
 }
 
-export function setGlobalParams(context: CanvasRenderingContext2D, params: DrawParams, 
+export function setGlobalParams(context: CanvasRenderingContext2D, tool: Tool, params: DrawParams, 
                                 lastParams: DrawParams, ratio: number) {
   const opacity = lerp(lastParams.opacity, params.opacity, ratio);
   const size = lerp(lastParams.size, params.size, ratio);
   context.globalAlpha = opacity;
   context.lineWidth = size;
-  if (params.tool.erase) {
+  if (tool.shouldErase()) {
     context.globalCompositeOperation = 'destination-out';
   } else {
     context.globalCompositeOperation = 'source-over';
@@ -267,7 +269,7 @@ export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCa
   context.drawImage(sourceCanvas, 0, 0);
 }
 
-export function drawGradientsInContext(context: CanvasRenderingContext2D, params: DrawParams, 
+export function drawGradientsInContext(context: CanvasRenderingContext2D, tool: GradientTool, params: DrawParams, 
                                        lastTargetParams?: DrawParams) { 
   const lastParams = lastTargetParams || params;
   const position = params.position;
@@ -279,7 +281,7 @@ export function drawGradientsInContext(context: CanvasRenderingContext2D, params
     const x = lastPosition.x + (Math.sin(angle) * i);
     const y = lastPosition.y + (Math.cos(angle) * i);
     const ratio = i / distance;
-    setGlobalParams(context, params, lastParams, ratio);    
+    setGlobalParams(context, tool, params, lastParams, ratio);    
     context.globalAlpha = 1;
     const size = lerp(lastParams.size, params.size, ratio);
     const opacity = lerp(lastParams.opacity, params.opacity, ratio);
@@ -301,12 +303,6 @@ export function drawGradientsInContext(context: CanvasRenderingContext2D, params
   }
 }
 
-export function drawGradients(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
-  drawGradientsInContext(bufferContext, params, lastParams);
-  return getAllImageData(bufferContext);
-}
-
 export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
   return {
     x: p1.x + (p2.x - p1.x) / 2,
@@ -314,22 +310,16 @@ export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
   };
 }
 
-export function drawLinesInContext(context: CanvasRenderingContext2D, params: DrawParams, lastParams?: DrawParams) {
+export function drawLinesInContext(context: CanvasRenderingContext2D, tool: LineTool, 
+                                   params: DrawParams, lastParams: DrawParams) {
   const color = params.color;
   context.lineWidth = params.size;
   context.lineJoin = context.lineCap = 'round';  
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
-  drawLineSegments(context, 1, params, lastParams || params);
+  drawLineSegments(context, 1, tool, params, lastParams);
 }
 
-export function drawLines(imageData: ImageData, params: DrawParams, lastParams: DrawParams): ImageData {
-  initCanvas(bufferCanvas, imageData.width, imageData.height, imageData);
-  const context = bufferContext;
-  drawLinesInContext(context, params, lastParams);
-  return getAllImageData(context);
-}
-
-export function drawLineSegments(context: CanvasRenderingContext2D, minDistance: number, 
+export function drawLineSegments(context: CanvasRenderingContext2D, minDistance: number, tool: LineTool,
                                  params: DrawParams, lastParams: DrawParams) {
   const start = lastParams.position;
   const end = params.position;
@@ -340,7 +330,7 @@ export function drawLineSegments(context: CanvasRenderingContext2D, minDistance:
   context.moveTo(start.x, start.y);    
   for (let z = 0 ; z < distance; z += minDistance ) {
     const ratio = z / distance;
-    setGlobalParams(context, params, lastParams, ratio);  
+    setGlobalParams(context, tool, params, lastParams, ratio);  
     const x = start.x + (Math.sin(angle) * z);
     const y = start.y + (Math.cos(angle) * z);
     context.beginPath();
@@ -380,16 +370,13 @@ export function getPatternCanvas(image: HTMLImageElement, patternScale: number, 
   return patternCanvas;
 }
 
-export function drawFromPatternInContext(context: CanvasRenderingContext2D, params: DrawParams, 
-                                         lastParams?: DrawParams) {
-  if (!params.tool.grainImage) {
-    throw new Error('No grain image found for tool!');
-  }
-  const grainScale = params.tool.grainScale ? params.tool.grainScale : 1;
-  const grainImage = params.tool.grainImage;
+export function drawFromPatternInContext(context: CanvasRenderingContext2D, tool: PatternTool, params: DrawParams, 
+                                         lastParams: DrawParams) {
+  const grainScale = tool.getPatternScale();
+  const grainImage = tool.getPatternImage();
   const pattern = context.createPattern(getPatternCanvas(grainImage, grainScale, 10), 'repeat');
   context.lineWidth = params.size;
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
-  drawLineSegments(context, params.size / 2, params, lastParams || params);
+  drawLineSegments(context, params.size / 2, tool, params, lastParams);
 }

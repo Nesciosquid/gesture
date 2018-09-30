@@ -1,17 +1,14 @@
-import Tool from '../../types/tools/Tool';
-import { ToolType } from '../../types/tools/index';
+import { GradientToolConfig } from '../GradientTool';
+import { ToolType } from '../Tool';
 
-const softEraser: Tool = {
+export const softEraser: GradientToolConfig = {
   name: 'soft eraser',
-  id: 'soft eraser',
-  type: ToolType.GRADIENTS,
+  toolType: ToolType.GRADIENTS,
   maxSizeRatio: 1,
   minSizeRatio: .2,
   maxOpacityRatio: 1,
   minOpacityRatio: .2,
-  currentOpacity: 1,
-  currentSize: 10,
-  erase: true
+  shouldErase: true
 };
 
 export default softEraser;

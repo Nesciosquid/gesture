@@ -32,7 +32,6 @@ export default class TransformableCanvas extends React.Component<TransformableCa
   }
 
   redrawCanvas = (sourceCanvas: HTMLCanvasElement, matrix: TransformMatrix) => {
-    console.log("Redrawing");
     if (this.canvas) {
       if (this.canvas.height !== this.canvas.clientHeight) {
         this.canvas.height = this.canvas.clientHeight;
@@ -54,7 +53,8 @@ export default class TransformableCanvas extends React.Component<TransformableCa
           style={{ flexGrow: 1}}
         />
         <ReactResizeDetector 
-          onResize={() => this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix)} />
+          onResize={() => this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix)} 
+        />
       </div>
     );
   }

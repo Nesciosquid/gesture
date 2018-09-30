@@ -1,9 +1,9 @@
 import { ReduxAction } from '../actions/index';
 import { actionTypes } from '../actions/tools';
-import { ToolOptions } from '../types/tools';
-import defaultTools from '../tools/defaultTools/index';
+import defaultToolConfigs from '../tools/defaultTools/index';
 import { RGBColor } from 'react-color';
-import Tool from '../types/tools/Tool';
+import { Tool } from '../tools/Tool';
+import { buildTool } from '../tools';
 
 export interface ToolsState {
   pressure: {
@@ -13,7 +13,7 @@ export interface ToolsState {
   color: RGBColor;
   tools: {
     selected?: Tool,
-    options: ToolOptions
+    options: Tool[]
   };
   lastHammerAction?: {
     event?: HammerInput,
@@ -21,6 +21,8 @@ export interface ToolsState {
   };
   currentLayer: number;
 }
+
+const defaultTools = defaultToolConfigs.map(buildTool).filter(tool => tool != null) as Tool[];
 
 export const DefaultToolsState: ToolsState = {
   pressure: {

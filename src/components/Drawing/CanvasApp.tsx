@@ -4,7 +4,7 @@ import ToolsPanel from './ToolsPanel';
 import './Drawing.scss';
 import { ReduxState } from '../../reducers/index';
 import { connect } from 'react-redux';
-import Tool from '../../types/tools/Tool';
+import { Tool } from '../../tools/Tool';
 import { setSelectedTool } from '../../actions/tools';
 import { getColorData } from '../../utils/canvas';
 import { getSelectedTool, getColor } from '../../selectors/tools';
