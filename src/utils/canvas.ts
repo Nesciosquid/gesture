@@ -41,7 +41,6 @@ export async function updateGrainImage(tool: PatternTool, color: RGBColor) {
   if (!tool.getPatternSource()) {
     throw new Error('Tool does not have a grain pattern.');
   }
-  alert(tool.getPatternSource());
   const grainData = getImageData(tool.getPatternSource());
   const colorized = await colorizeImageData(grainData, color);
   const colorizedImage = await getImage(colorized);
