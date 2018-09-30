@@ -60,6 +60,7 @@ export default class CanvasWrapper extends React.Component<CanvasWrapperProps, C
   stopDrawing = () => {
     this.lastParams = undefined;
     this.isDrawing = false;
+    this.lastParams = undefined;
     this.props.onStopSampling();
   }
 

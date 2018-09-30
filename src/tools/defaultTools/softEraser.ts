@@ -5,9 +5,9 @@ export const softEraser: GradientToolConfig = {
   name: 'soft eraser',
   toolType: ToolType.GRADIENTS,
   maxSizeRatio: 1,
-  minSizeRatio: .2,
+  minSizeRatio: 1,
   maxOpacityRatio: 1,
-  minOpacityRatio: .2,
+  minOpacityRatio: 0,
   shouldErase: true
 };
 

@@ -377,5 +377,5 @@ export function drawFromPatternInContext(context: CanvasRenderingContext2D, tool
   context.lineWidth = params.size;
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
-  drawLineSegments(context, params.size / 2, tool, params, lastParams);
+  drawLineSegments(context, params.size / 4, tool, params, lastParams);
 }
