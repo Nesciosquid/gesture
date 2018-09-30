@@ -3,18 +3,18 @@ import { SketchPicker, RGBColor } from 'react-color';
 import { setColor } from '../../actions/tools';
 import { connect } from 'react-redux';
 import { ReduxState } from '../../reducers/index';
-import { ToolOptions } from '../../types/tools';
 import { Button } from 'reactstrap';
 import ToolButton from './ToolButton';
 import SaveButton from './SaveButton';
 import { getToolOptions, getColor } from '../../selectors/tools';
 import { TransformMatrix, Transform } from '../../utils/transform';
 import { getAverageLog, getSampleRate } from '../../selectors/performance';
+import { Tool } from '../../tools/Tool';
 
 interface ToolsPanelProps {
   color: RGBColor;
   setColor: (color: RGBColor) => void;
-  toolOptions: ToolOptions;
+  tools: Tool[];
   averageLog: number;
   sampleRate: number;
 }
@@ -26,12 +26,7 @@ function ToolsPanel(props: ToolsPanelProps) {
         color={props.color}
         onChangeComplete={(color) => props.setColor(color.rgb)}
       /> */}
-      {
-        Object.keys(props.toolOptions).map((toolId: string) => {
-          const tool = props.toolOptions[toolId];
-          return <ToolButton tool={tool} key={tool.id} />;
-        })
-      }
+      {props.tools.map(tool => <ToolButton tool={tool} key={tool.getId()} />)}
       <div style={{height: '50px' }} />
       {/* <Button onClick={() => props.clear(1)}>Clear</Button> */}
       <div style={{height: '50px' }} />
@@ -47,7 +42,7 @@ function ToolsPanel(props: ToolsPanelProps) {
 function mapStateToProps(state: ReduxState) {
   return ({
     color: getColor(state),
-    toolOptions: getToolOptions(state),
+    tools: getToolOptions(state),
     averageLog: getAverageLog(state),
     sampleRate: getSampleRate(state)
   });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
-import Tool from '../../types/tools/Tool';
+import { Tool } from '../../tools/Tool';
 import { Button } from 'reactstrap';
 import { ReduxState } from '../../reducers/index';
 import { setSelectedTool } from '../../actions/tools';
@@ -16,7 +16,7 @@ function ToolButton({ selected, selectTool, tool}: ToolButtonProps) {
   const color = selected ? 'primary' : 'secondary';
   return (
     <Button color={color} onClick={selectTool}>
-      {tool.name}
+      {tool.getName()}
     </Button>
   );
 }

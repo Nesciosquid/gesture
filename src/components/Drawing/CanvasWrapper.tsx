@@ -5,11 +5,8 @@ import { DrawPosition, DrawParams } from '../../types/canvas';
 import DrawingActionWrapper from './DrawingActionWrapper';
 import { Transform } from '../../utils/transform';
 import TransformActionWrapper from './TransformActionWrapper';
-import { ToolType } from '../../types/tools';
-import { drawFromPatternInContext, drawLinesInContext, drawGradientsInContext } from '../../utils/canvas';
-import Tool from '../../types/tools/Tool';
+import { Tool } from '../../tools/Tool';
 import { RGBColor } from 'react-color';
-import { getDrawParams } from '../../utils/tools';
 
 export interface CanvasWrapperProps {
   canvas: HTMLCanvasElement;
@@ -53,7 +50,7 @@ export default class CanvasWrapper extends React.Component<CanvasWrapperProps, C
   startDrawing = (position: DrawPosition) => {
     const { tool, color } = this.props;
     if (!this.isDrawing && tool) {
-      const drawParams = getDrawParams(tool, position, color, this.pressure);
+      const drawParams = tool.getDrawParams(position, color, this.pressure);
       this.isDrawing = true;
       this.lastParams = drawParams;
       this.props.onStartSampling();
@@ -70,24 +67,11 @@ export default class CanvasWrapper extends React.Component<CanvasWrapperProps, C
     const context = this.props.canvas.getContext('2d') as CanvasRenderingContext2D;
     const { tool, color } = this.props;
     if (tool && this.isDrawing) {
-      const lastParams = this.lastParams;
-      const params = getDrawParams(tool, position, color, this.pressure);
-      switch (this.props.tool.type) {
-        case (ToolType.PATTERN): {
-          drawFromPatternInContext(context, params, lastParams);
-          break;
-        } 
-        case (ToolType.LINES): {
-          drawLinesInContext(context, params, lastParams);
-          break;
-        }
-        case (ToolType.GRADIENTS): {
-          drawGradientsInContext(context, params, lastParams);
-          break;
-        }
-        default: 
-          break;
-      }
+      const params = tool.getDrawParams(position, color, this.pressure);
+      const lastParams = this.lastParams || params;
+      
+      tool.onDraw(context, params, lastParams);
+
       this.lastParams = params;
       this.props.onSample();
       this.forceUpdate();

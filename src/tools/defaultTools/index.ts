@@ -1,15 +1,14 @@
-import pencil from './pencil';
-import pen from './pen';
+import pencil from './basicPencil';
+import pen from './basicPen';
 import softEraser from './softEraser';
 import transPen from './transPen';
-import softBrush from './softBrush';
-import target from './target';
+import { ToolConfig } from '../Tool';
 
-export default {
+const defaultToolConfigs: ToolConfig[] = [
   pencil,
   pen,
-  softEraser,
   transPen,
-  softBrush,
-  target
-};
+  softEraser 
+];
+
+export default defaultToolConfigs;

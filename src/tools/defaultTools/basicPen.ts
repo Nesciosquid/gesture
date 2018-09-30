@@ -1,14 +1,14 @@
 import { LineToolConfig } from '../LineTool';
 import { ToolType } from '../Tool';
 
-export const transPen: LineToolConfig = {
-  name: 'transPen',
+export const simplePen: LineToolConfig = {
+  name: 'pen',
   toolType: ToolType.LINES,
   maxSizeRatio: 1,
-  minSizeRatio: .1,
+  minSizeRatio: .2,
   maxOpacityRatio: 1,
-  minOpacityRatio: 0,
+  minOpacityRatio: 1,
   shouldErase: false
 };
 
-export default transPen;
+export default simplePen;
