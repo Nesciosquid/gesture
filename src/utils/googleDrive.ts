@@ -3,8 +3,6 @@ import { Album, AlbumImage } from './images';
 export const GOOGLE_DRIVE_SERVICE = 'drive';
 const API_KEY = process.env.REACT_APP_GOOGLE_DRIVE_API_KEY;
 
-console.log(API_KEY);
-
 export async function initializeDriveService() {
   return new Promise((resolve, reject) => {
     gapi.load('client', () => { 
