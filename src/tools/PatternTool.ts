@@ -12,8 +12,8 @@ export default class PatternTool extends LineTool {
     this.patternConfig = config;
     this.patternImage = config.patternSource;
   }
-  onDraw = (context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) => {
-    drawFromPatternInContext(context, this, params, lastParams);
+  onDraw = (context: CanvasRenderingContext2D, points: DrawParams[], start?: number, end?: number) => {
+    drawFromPatternInContext(context, this, points, start, end);
   }
 
   getPatternSource = () => this.patternConfig.patternSource;
@@ -23,16 +23,6 @@ export default class PatternTool extends LineTool {
   getPatternImage = () => this.patternImage;
 
   getType = () => ToolType.PATTERN;
-
-  getDrawParams = (position: DrawPosition, color: RGBColor, pressure: number) => {
-    return {
-      tool: this,
-      position,
-      color,
-      size: this.getModifiedSize(pressure),
-      opacity: this.getModifiedOpacity(pressure)
-    };
-  }
 }
 
 export interface PatternToolConfig extends ToolConfig {

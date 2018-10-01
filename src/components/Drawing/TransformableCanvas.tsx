@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { redrawSourceOntoTarget, } from '../../utils/canvas';
+import { redrawSourceOntoTarget, redrawSourcesOntoTarget, } from '../../utils/canvas';
 import { TransformMatrix, Transform } from '../../utils/transform';
 import ReactResizeDetector from 'react-resize-detector';
 
 interface TransformableCanvasProps {
   transformMatrix: TransformMatrix;
-  sourceCanvas: HTMLCanvasElement;
+  sourceCanvases: HTMLCanvasElement[];
 }
 
 export default class TransformableCanvas extends React.Component<TransformableCanvasProps> {
@@ -19,7 +19,7 @@ export default class TransformableCanvas extends React.Component<TransformableCa
       return;
     }
     this.initCanvas(this.canvas.clientWidth, this.canvas.clientHeight);
-    this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix);
+    this.redrawCanvas(this.props.sourceCanvases, this.props.transformMatrix);
   }
 
   initCanvas = (width: number, height: number) => {
@@ -31,7 +31,7 @@ export default class TransformableCanvas extends React.Component<TransformableCa
     }
   }
 
-  redrawCanvas = (sourceCanvas: HTMLCanvasElement, matrix: TransformMatrix) => {
+  redrawCanvas = (sourceCanvases: HTMLCanvasElement[], matrix: TransformMatrix) => {
     if (this.canvas) {
       if (this.canvas.height !== this.canvas.clientHeight) {
         this.canvas.height = this.canvas.clientHeight;
@@ -39,12 +39,12 @@ export default class TransformableCanvas extends React.Component<TransformableCa
       if (this.canvas.width !== this.canvas.clientWidth) {
         this.canvas.width = this.canvas.clientWidth;
       }
-      redrawSourceOntoTarget(this.canvas, sourceCanvas, matrix);      
+      redrawSourcesOntoTarget(this.canvas, sourceCanvases, matrix);
     }
   }
 
   render() {
-    this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix);
+    this.redrawCanvas(this.props.sourceCanvases, this.props.transformMatrix);
     return (
       <div>
         <canvas 
@@ -53,7 +53,7 @@ export default class TransformableCanvas extends React.Component<TransformableCa
           style={{ flexGrow: 1}}
         />
         <ReactResizeDetector 
-          onResize={() => this.redrawCanvas(this.props.sourceCanvas, this.props.transformMatrix)} 
+          onResize={() => this.redrawCanvas(this.props.sourceCanvases, this.props.transformMatrix)} 
         />
       </div>
     );

@@ -3,8 +3,7 @@ import { RGBColor } from 'react-color';
 
 export interface DrawParams {
   position: DrawPosition;
-  opacity: number;
-  size: number;
+  pressure: number;
   color: RGBColor;
 }
 

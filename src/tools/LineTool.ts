@@ -6,21 +6,11 @@ import { drawLinesInContext } from '../utils/canvas';
 import { RGBColor } from 'react-color';
 
 export default class LineTool extends BasicTool implements Tool {
-  onDraw = (context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) => {
-    drawLinesInContext(context, this, params, lastParams);
+  onDraw = (context: CanvasRenderingContext2D, points: DrawParams[], start?: number, end?: number) => {
+    drawLinesInContext(context, this, points, start, end);
   }
 
   getType = () => ToolType.LINES;
-
-  getDrawParams = (position: DrawPosition, color: RGBColor, pressure: number) => {
-    return {
-      tool: this,
-      position,
-      color,
-      size: this.getModifiedSize(pressure),
-      opacity: this.getModifiedOpacity(pressure)
-    };
-  }
 }
 
 export interface LineToolConfig extends ToolConfig {

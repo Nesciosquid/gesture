@@ -8,6 +8,7 @@ import { TransformMatrix } from './transform';
 import PatternTool from '../tools/PatternTool';
 import LineTool from '../tools/LineTool';
 import GradientTool from '../tools/GradientTool';
+import { getCurvePoints } from 'cardinal-spline-js';
 
 const bufferCanvas: HTMLCanvasElement = document.createElement('canvas');
 const bufferContext = bufferCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -122,9 +123,21 @@ export function initCanvas(canvas: HTMLCanvasElement, width: number, height: num
 }
 
 export function setGlobalParams(context: CanvasRenderingContext2D, tool: Tool, params: DrawParams, 
-                                lastParams: DrawParams, ratio: number) {
-  const opacity = lerp(lastParams.opacity, params.opacity, ratio);
-  const size = lerp(lastParams.size, params.size, ratio);
+                                lastParams?: DrawParams, ratio?: number) {
+  ratio = ratio !== undefined ? ratio : .5;
+  let opacity, size;
+  if (lastParams) {
+    const lastOpacity = tool.getModifiedOpacity(lastParams);
+    const newOpacity = tool.getModifiedOpacity(params);
+    const lastSize = tool.getModifiedSize(lastParams);
+    const newSize = tool.getModifiedSize(params);
+    opacity = lerp(lastOpacity, newOpacity, ratio);
+    size = lerp(lastSize, newSize, ratio);
+  } else {
+    opacity = tool.getModifiedOpacity(params);
+    size = tool.getModifiedSize(params);
+  }
+
   context.globalAlpha = opacity;
   context.lineWidth = size;
   if (tool.shouldErase()) {
@@ -148,47 +161,6 @@ export function getColorData(color: RGBColor, width: number, height: number) {
   }
   return new ImageData(data, width, height);
 }
-
-// export function updateFromLayers(imageData: ImageData, layers: DrawLayer[], bounds: DrawBounds): ImageData {
-//   const partialBackground = getPartialImageData(layers[0].imageData, bounds);
-//   const initialData = new ImageData(partialBackground.data, bounds.width, bounds.height);
-//   combineContext.putImageData(initialData, 0, 0, 0, 0, bounds.width, bounds.height);
-//   initCanvas(combineCanvas, bounds.width, bounds.height, initialData);
-//   initCanvas(bufferCanvas, bounds.width, bounds.height);
-//   const tempArray = new Uint8ClampedArray(bounds.width * bounds.height * 4);
-//   layers.forEach((layer, index) => {
-//     if (index !== 0) {
-//       const partialData = getPartialImageData(layer.imageData, bounds, tempArray).data;
-//       const image = new ImageData(partialData, bounds.width, bounds.height);
-//       bufferContext.putImageData(image, 0, 0, 0, 0, bounds.width, bounds.height);
-//       combineContext.globalCompositeOperation = 'source-over';
-//       combineContext.drawImage(bufferCanvas, 0, 0);
-//     }
-//   });
-//   const updatedPartialData = combineContext.getImageData(0, 0, bounds.width, bounds.height);
-//   const newData = putPartialImageData(imageData, updatedPartialData, bounds);
-//   return new ImageData(newData.data, imageData.width, imageData.height);
-// }
-
-// export function combineLayers(layers: DrawLayer[]) {
-//   const background = layers[0];
-//   const width = background.imageData.width;
-//   const height = background.imageData.height;
-//   initCanvas(combineCanvas, width, height, background.imageData);
-//   initCanvas(bufferCanvas, width, height);
-//   layers.forEach((layer, index) => {
-//     if (index !== 0) {
-//       if (layer.imageData.width !== width || layer.imageData.height !== height) {
-//         throw new Error(`Layer imagedata has wrong width or height. 
-//           Background has width ${width} and height ${height}. 
-//           Layer has width ${layer.imageData.width} and height ${layer.imageData.height})`);
-//       }
-//       bufferContext.putImageData(layer.imageData, 0, 0);
-//       combineContext.drawImage(bufferCanvas, 0, 0);
-//     }
-//   });
-//   return getAllImageData(combineContext);
-// }
 
 export function putPartialImageData(targetImageData: ImageDataWrapper, partialData: ImageDataWrapper, 
                                     bounds: DrawBounds, targetArray?: Uint8ClampedArray): ImageDataWrapper {
@@ -259,6 +231,26 @@ export function drawColorOntoTarget(targetCanvas: HTMLCanvasElement, color: RGBC
   }
 }
 
+export function clearCanvas(targetCanvas: HTMLCanvasElement) {
+  const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
+  context.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+}
+
+export function redrawSourcesOntoTarget(targetCanvas: HTMLCanvasElement, sourceCanvases: HTMLCanvasElement[],
+                                        matrix: TransformMatrix) {
+  if (sourceCanvases.length === 0) {
+    throw new Error('No canvas to redraw.');
+  }
+  const firstCanvas = sourceCanvases[0];
+  const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, firstCanvas.width, firstCanvas.height);
+  context.setTransform(matrix.scX, matrix.skX, matrix.skY, matrix.scY, matrix.tX, matrix.tY);
+  sourceCanvases.forEach(canvas => {
+    context.drawImage(canvas, 0, 0);
+  });
+}
+
 export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCanvas: HTMLCanvasElement, 
                                        matrix: TransformMatrix ) {
   const context = targetCanvas.getContext('2d') as CanvasRenderingContext2D;
@@ -268,37 +260,56 @@ export function redrawSourceOntoTarget(targetCanvas: HTMLCanvasElement, sourceCa
   context.drawImage(sourceCanvas, 0, 0);
 }
 
-export function drawGradientsInContext(context: CanvasRenderingContext2D, tool: GradientTool, params: DrawParams, 
-                                       lastTargetParams?: DrawParams) { 
-  const lastParams = lastTargetParams || params;
-  const position = params.position;
-  const lastPosition = lastParams.position;
-  const distance = distanceBetween(lastPosition, position);
-  const angle = angleBetween(lastPosition, position);
+export function getLastParams(points: DrawParams[], index: number) {
+  if (points.length === 0) {
+    return null;
+  }
+  if ((index - 1) < 0) {
+    return points[0];
+  }
+  return points[index - 1];
+}
 
-  for (let i = 0; i < distance; i += 1) {
-    const x = lastPosition.x + (Math.sin(angle) * i);
-    const y = lastPosition.y + (Math.cos(angle) * i);
-    const ratio = i / distance;
-    setGlobalParams(context, tool, params, lastParams, ratio);    
-    context.globalAlpha = 1;
-    const size = lerp(lastParams.size, params.size, ratio);
-    const opacity = lerp(lastParams.opacity, params.opacity, ratio);
-    const color = params.color;
-    const r = color.r;
-    const g = color.g;
-    const b = color.b;
-    const a = opacity;
-    const startColor = `rgba(${r},${g},${b},${a})`;  
-    const midColor = `rgba(${r},${g},${b},${a * .5})`;  
-    const endColor = `rgba(${r},${g},${b},0)`;  
-    var gradient = context.createRadialGradient(x, y, size / 4, x, y, size / 2);    
-    
-    gradient.addColorStop(0, startColor);
-    gradient.addColorStop(0.5, midColor);
-    gradient.addColorStop(1, endColor);
-    context.fillStyle = gradient;
-    context.fillRect(x - params.size / 2, y - params.size / 2, size, size);
+export function drawGradientsInContext(context: CanvasRenderingContext2D, tool: GradientTool, points: DrawParams[],
+                                       start?: number, end?: number) { 
+  start = start !== undefined ? start : 0;
+  end = end !== undefined ? end : points.length;
+  for (let index = start; index < end; index ++) {
+    const params = points[index];
+    const lastParams = getLastParams(points, index) as DrawParams;
+    const position = params.position;
+    const lastPosition = lastParams.position;
+    const distance = distanceBetween(lastPosition, position);
+    const angle = angleBetween(lastPosition, position);
+    const lastSize = tool.getModifiedSize(lastParams);
+    const newSize = tool.getModifiedSize(params);
+    const lastOpacity = tool.getModifiedOpacity(lastParams);
+    const newOpacity = tool.getModifiedOpacity(params);
+  
+    for (let i = 0; i < distance; i += 1) {
+      const x = lastPosition.x + (Math.sin(angle) * i);
+      const y = lastPosition.y + (Math.cos(angle) * i);
+      const ratio = i / distance;
+      setGlobalParams(context, tool, params, lastParams, ratio);    
+      context.globalAlpha = 1;
+      const size = lerp(lastSize, newSize, ratio);
+      const opacity = lerp(lastOpacity, newOpacity, ratio);
+      const color = params.color;
+      const r = color.r;
+      const g = color.g;
+      const b = color.b;
+      const a = opacity;
+      const startColor = `rgba(${r},${g},${b},${a})`;  
+      const midColor = `rgba(${r},${g},${b},${a * .5})`;  
+      const endColor = `rgba(${r},${g},${b},0)`;  
+      var gradient = context.createRadialGradient(x, y, size / 4, x, y, size / 2);    
+      
+      gradient.addColorStop(0, startColor);
+      gradient.addColorStop(0.5, midColor);
+      gradient.addColorStop(1, endColor);
+      context.fillStyle = gradient;
+      context.fillRect(x - newSize / 2, y - newSize / 2, size, size);
+    }
   }
 }
 
@@ -309,35 +320,71 @@ export function midPointBetween(p1: DrawPosition, p2: DrawPosition) {
   };
 }
 
-export function drawLinesInContext(context: CanvasRenderingContext2D, tool: LineTool, 
-                                   params: DrawParams, lastParams: DrawParams) {
+export function drawLinesInContext(context: CanvasRenderingContext2D, tool: LineTool, points: DrawParams[],
+                                   start?: number, end?: number) {
+  if (points.length === 0 ) {
+    return;
+  }
+  start = start !== undefined ? start : 0;
+  end = end !== undefined ? end : points.length;
+  const params = points[start];
   const color = params.color;
-  context.lineWidth = params.size;
-  context.lineJoin = context.lineCap = 'round';  
+  context.lineJoin = context.lineCap = 'round'; 
   context.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${(color.a ? color.a : 1)}`;
-  drawLineSegments(context, 1, tool, params, lastParams);
+  drawLineSegments(context, 1, tool, points, start, end);
+                                   }
+
+export function computeCurveParams(points: DrawParams[], tension: number, segments: number): DrawParams[] {
+  if (points.length === 0) {
+    return points;
+  }
+  const pointsArray: number[] = [];
+  points.forEach(point => {
+    pointsArray.push(point.position.x);
+    pointsArray.push(point.position.y);
+  });
+  const curvePoints = getCurvePoints(pointsArray, tension, segments);
+  const newParams: DrawParams[] = [];
+  for (let i = 0; i < curvePoints.length; i += 2) {
+    const x = curvePoints[i];
+    const y = curvePoints[i + 1];
+    const position = { x, y };
+    const pointNumber = Math.floor(i / 2);
+    const startParamIndex = Math.floor(pointNumber / segments);
+    const offset = pointNumber % segments;
+    const ratio = offset / segments;
+    const endParamIndex = startParamIndex + 1;
+    const startParam = points[startParamIndex];
+    const endParam = points[endParamIndex] || startParam;
+    newParams.push({
+      position: { x, y },
+      pressure: lerp(startParam.pressure, endParam.pressure, ratio),
+      color: startParam.color
+    });
+  }
+  return newParams;
 }
 
 export function drawLineSegments(context: CanvasRenderingContext2D, minDistance: number, tool: LineTool,
-                                 params: DrawParams, lastParams: DrawParams) {
-  const start = lastParams.position;
-  const end = params.position;
-  const distance = distanceBetween(start, end);
-  const angle = angleBetween(start, end);
-  let lastX = start.x;
-  let lastY = start.y;
-  context.moveTo(start.x, start.y);    
-  for (let z = 0 ; z < distance; z += minDistance ) {
-    const ratio = z / distance;
-    setGlobalParams(context, tool, params, lastParams, ratio);  
-    const x = start.x + (Math.sin(angle) * z);
-    const y = start.y + (Math.cos(angle) * z);
+                                 points: DrawParams[], start?: number, end?: number) {
+  start = start !== undefined ? start : 0;
+  end = end !== undefined ? end : points.length;
+  const segments = 10;
+  const tension = .4;
+  const curveParams = computeCurveParams(points, tension, segments);
+  const curveParamStart = start * segments;
+  const curveParamEnd = Math.min(end * segments, curveParams.length);
+  for (let index = curveParamStart; index < curveParamEnd; index ++) {
+    const params = curveParams[index];
+    const lastParams = curveParams[index - 1] || params;
+    const startPosition = lastParams.position;
+    const endPosition = params.position;
+    
+    setGlobalParams(context, tool, params);
     context.beginPath();
-    context.moveTo(lastX, lastY);
-    context.lineTo(x, y);
+    context.moveTo(startPosition.x, startPosition.y);
+    context.lineTo(endPosition.x, endPosition.y);
     context.stroke();
-    lastX = x;
-    lastY = y;
   }
 }
 
@@ -369,13 +416,18 @@ export function getPatternCanvas(image: HTMLImageElement, patternScale: number, 
   return patternCanvas;
 }
 
-export function drawFromPatternInContext(context: CanvasRenderingContext2D, tool: PatternTool, params: DrawParams, 
-                                         lastParams: DrawParams) {
+export function drawFromPatternInContext(context: CanvasRenderingContext2D, tool: PatternTool, points: DrawParams[],
+                                         start?: number, end?: number) {
+  if (points.length === 0) {
+    return;
+  }
+  const params = points[0];
   const grainScale = tool.getPatternScale();
   const grainImage = tool.getPatternImage();
   const pattern = context.createPattern(getPatternCanvas(grainImage, grainScale, 10), 'repeat');
-  context.lineWidth = params.size;
+  const size = tool.getModifiedSize(params);
+  context.lineWidth = size;
   context.strokeStyle = pattern;
   context.lineJoin = context.lineCap = 'round';  
-  drawLineSegments(context, params.size / 4, tool, params, lastParams);
+  drawLineSegments(context, size / 4, tool, points, start, end);
 }

@@ -5,20 +5,11 @@ import { drawGradientsInContext } from '../utils/canvas';
 import { RGBColor } from 'react-color';
 
 export default class GradientTool extends BasicTool implements Tool {
-  onDraw = (context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) => {
-    drawGradientsInContext(context, this, params, lastParams);
+  onDraw = (context: CanvasRenderingContext2D, points: DrawParams[], start?: number, end?: number) => {
+    drawGradientsInContext(context, this, points, start, end);
   }
 
   getType = () => ToolType.GRADIENTS;
-
-  getDrawParams = (position: DrawPosition, color: RGBColor, pressure: number) => {
-    return {
-      position,
-      color,
-      size: this.getModifiedSize(pressure),
-      opacity: this.getModifiedOpacity(pressure)
-    };
-  }
 }
 
 export interface GradientToolConfig extends ToolConfig {

@@ -888,6 +888,10 @@ capture-stack-trace@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/capture-stack-trace/-/capture-stack-trace-1.0.0.tgz#4a6fa07399c26bba47f0b2496b4d0fb408c5550d"
 
+cardinal-spline-js@^2.3.9:
+  version "2.3.9"
+  resolved "https://registry.yarnpkg.com/cardinal-spline-js/-/cardinal-spline-js-2.3.9.tgz#7e7cbbb4aad69a3ba1787cde82f63318e8b95d05"
+
 case-sensitive-paths-webpack-plugin@2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/case-sensitive-paths-webpack-plugin/-/case-sensitive-paths-webpack-plugin-2.1.1.tgz#3d29ced8c1f124bf6f53846fb3f5894731fdc909"

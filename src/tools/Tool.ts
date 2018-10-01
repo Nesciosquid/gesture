@@ -1,7 +1,8 @@
 import { DrawParams, DrawPosition } from '../types/canvas';
 import { RGBColor } from 'react-color';
 
-export type ToolDrawCallback = (context: CanvasRenderingContext2D, params: DrawParams, lastParams: DrawParams) => void;
+export type ToolDrawCallback = (context: CanvasRenderingContext2D, points: DrawParams[], 
+                                start?: number, end?: number) => void;
 
 export enum ToolType {
   CURVES,
@@ -24,12 +25,16 @@ export interface Tool {
   getOpacity: () => number;
   getSize: () => number;
 
-  getModifiedOpacity: (fraction: number) => number;
-  getModifiedSize: (fraction: number) => number;
-  getDrawParams: (position: DrawPosition, color: RGBColor, pressure: number) => DrawParams;
+  getModifiedOpacity: (params: DrawParams) => number;
+  getModifiedSize: (params: DrawParams) => number;
 
   shouldErase: () => boolean;
   onDraw: ToolDrawCallback;
+}
+
+export interface StrokeHistoryPoint {
+  measured: DrawParams;
+  predicted: DrawParams;
 }
 
 export interface ToolConfig {

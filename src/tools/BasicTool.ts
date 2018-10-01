@@ -2,7 +2,7 @@ import { Tool, ToolConfig } from './Tool';
 import lerp from 'lerp';
 import { RGBColor } from 'react-color';
 import * as uuid from 'uuid/v4';
-import { DrawPosition } from '../types/canvas';
+import { DrawPosition, DrawParams } from '../types/canvas';
 
 export default abstract class BasicTool implements Partial<Tool> {
   private config: ToolConfig;
@@ -33,12 +33,13 @@ export default abstract class BasicTool implements Partial<Tool> {
 
   shouldErase = () => this.config.shouldErase;
 
-  getModifiedOpacity = (fraction: number) => {
-    return this.getOpacity() * lerp(this.getMinOpacityRatio(), this.getMaxOpacityRatio(), this.sanitize(fraction));
+  getModifiedOpacity = (params: DrawParams) => {
+    return this.getOpacity() * 
+      lerp(this.getMinOpacityRatio(), this.getMaxOpacityRatio(), this.sanitize(params.pressure));
   }
 
-  getModifiedSize = (fraction: number) => {
-    return this.getSize() * lerp(this.getMinSizeRatio(), this.getMaxSizeRatio(),  this.sanitize(fraction));
+  getModifiedSize = (params: DrawParams) => {
+    return this.getSize() * lerp(this.getMinSizeRatio(), this.getMaxSizeRatio(),  this.sanitize(params.pressure));
   }
 
   private sanitize(fraction?: number) {
