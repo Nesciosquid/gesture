@@ -17,6 +17,7 @@ interface AppProps {
 }
 
 interface AppState {
+  faded: boolean;
   albumId: string;
   currentImageIndex?: number;
   shuffledImages?: AlbumImage[];
@@ -32,6 +33,7 @@ class App extends React.Component<AppProps, AppState>  {
   constructor(props: AppProps) {
     super(props);
     this.state = {
+      faded: false,
       albumId: '',
       albumsModal: false,
       timeSettingsModal: false,
@@ -50,7 +52,9 @@ class App extends React.Component<AppProps, AppState>  {
       if (newTime > 0 ) {
         this.setState({ remainingTime: newTime });
       } else {
-        this.advanceImage();
+        if (!this.state.faded) {
+          this.advanceImage();
+        }
       }
     }
   }
@@ -77,14 +81,31 @@ class App extends React.Component<AppProps, AppState>  {
     if (this.state.shuffledImages && this.state.currentImageIndex !== undefined) {
       const maxIndex = this.state.shuffledImages.length - 1;
       const nextIndex = this.state.currentImageIndex + 1;
-      if (nextIndex > maxIndex) {
-        this.shuffleImages(this.props.allImages);
-      } else {
-        this.setState({
-          currentImageIndex: nextIndex,
-          remainingTime: this.props.advanceTime
-        });
-      }
+      this.setState({
+        faded: true,
+        remainingTime: 0
+      });
+      setTimeout(
+        () => {
+          if (nextIndex > maxIndex) {
+            this.shuffleImages(this.props.allImages);
+          } else {
+            this.setState({
+              currentImageIndex: nextIndex,
+            });
+            setTimeout(
+              () => {
+                this.setState({
+                  remainingTime: this.props.advanceTime,
+                  faded: false,
+                });
+              },
+              2000
+            );
+          }
+        }, 
+        15000
+      );
     }
   }
   shuffleImages = (images: AlbumImage[]) => {
@@ -116,11 +137,15 @@ class App extends React.Component<AppProps, AppState>  {
         </div>
       );
     }
+    let imageClass = 'hero-image';
+    if (this.state.faded) {
+      imageClass += ' faded';
+    }
     if (!current) {
       return null;
     } 
 
-    return <img src={current.getUrl().toString()} className="hero-image" />;  
+    return <img src={current.getUrl().toString()} className={imageClass} />;  
   }
   toggleAlbumsModal = () => {
     this.setState({

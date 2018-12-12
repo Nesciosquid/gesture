@@ -30,7 +30,9 @@ const fileFields: string[] = [
 
 export async function getAlbum(id: string): Promise<DriveAlbum> {
   const result = 
-    await gapi.client.drive.files.list({ q: `'${id}' in parents`, fields: `files(${fileFields.join(',')})`});
+    await gapi.client.drive.files.list({
+       q: `'${id}' in parents`, pageSize: 1000, fields: `files(${fileFields.join(',')})`
+    });
   const albumResult = await gapi.client.drive.files.get({ fileId: id});
   let title: string;
   if (albumResult.result) {
@@ -44,6 +46,7 @@ export async function getAlbum(id: string): Promise<DriveAlbum> {
   } else {
     images = [];
   }
+  console.log(result);
   return new DriveAlbum(title, id, images);
 }
 

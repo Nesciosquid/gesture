@@ -15,8 +15,9 @@ export interface AdvanceTimeSelectorProps {
 }
 
 export default function({options, onClickOption, advanceTime, active}: AdvanceTimeSelectorProps) {
-    const buttons = options.map(option => (
+    const buttons = options.map((option, index) => (
         <Button
+            key={index.toString()}
             active={active}
             onClick={() => onClickOption(option.time)}
             color={option.time === advanceTime ? 'primary' : 'secondary'}
